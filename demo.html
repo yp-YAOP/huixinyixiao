@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>游戏数据上传演示</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+        background: #f5f5f7;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .demo-section {
+        display: flex;
+        gap: 20px;
+        height: 80vh;
+      }
+      .game-section,
+      .medical-section {
+        flex: 1;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #1d1d1f;
+      }
+      iframe {
+        width: 100%;
+        height: calc(100% - 50px);
+        border: none;
+        border-radius: 8px;
+      }
+      .instructions {
+        background: #e8f4f8;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f0f0f0;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34c759;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* 🎯 响应式设计 - 确保演示页面在所有设备上完美显示 */
+
+      /* 基础响应式设置 */
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+
+      .container {
+        width: 100%;
+        padding: 0 20px;
+      }
+
+      /* 媒体查询 - 大屏幕优化 */
+      @media (min-width: 1920px) {
+        .container {
+          max-width: 1600px;
+          padding: 0 40px;
+        }
+
+        .demo-section {
+          height: 85vh;
+          gap: 30px;
+        }
+
+        .header h1 {
+          font-size: 2.5rem;
+        }
+
+        .instructions {
+          font-size: 16px;
+          padding: 20px;
+        }
+      }
+
+      /* 媒体查询 - 中等屏幕 */
+      @media (max-width: 1200px) {
+        .container {
+          padding: 0 15px;
+        }
+
+        .demo-section {
+          height: 75vh;
+          gap: 15px;
+        }
+
+        .header h1 {
+          font-size: 1.8rem;
+        }
+
+        .section-title {
+          font-size: 16px;
+        }
+
+        .instructions {
+          font-size: 13px;
+          padding: 12px;
+        }
+      }
+
+      /* 媒体查询 - 平板设备 */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+
+        .container {
+          padding: 0 10px;
+        }
+
+        .header {
+          margin-bottom: 20px;
+        }
+
+        .header h1 {
+          font-size: 1.6rem;
+          margin-bottom: 10px;
+        }
+
+        .header p {
+          font-size: 14px;
+        }
+
+        .demo-section {
+          flex-direction: column;
+          height: auto;
+          gap: 20px;
+        }
+
+        .game-section,
+        .medical-section {
+          width: 100%;
+          height: 60vh;
+          min-height: 400px;
+          padding: 15px;
+        }
+
+        .section-title {
+          font-size: 15px;
+          margin-bottom: 10px;
+        }
+
+        .instructions {
+          font-size: 12px;
+          padding: 10px;
+          margin-bottom: 15px;
+        }
+
+        .status {
+          font-size: 12px;
+          padding: 8px;
+          margin-bottom: 10px;
+        }
+
+        iframe {
+          height: calc(100% - 80px);
+        }
+      }
+
+      /* 媒体查询 - 手机屏幕 */
+      @media (max-width: 480px) {
+        body {
+          padding: 5px;
+        }
+
+        .container {
+          padding: 0 5px;
+        }
+
+        .header h1 {
+          font-size: 1.4rem;
+          margin-bottom: 8px;
+        }
+
+        .header p {
+          font-size: 13px;
+        }
+
+        .game-section,
+        .medical-section {
+          height: 50vh;
+          min-height: 350px;
+          padding: 12px;
+          border-radius: 8px;
+        }
+
+        .section-title {
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .instructions {
+          font-size: 11px;
+          padding: 8px;
+          line-height: 1.4;
+        }
+
+        .status {
+          font-size: 11px;
+          padding: 6px;
+          margin-bottom: 8px;
+        }
+
+        .status-dot {
+          width: 6px;
+          height: 6px;
+        }
+
+        iframe {
+          height: calc(100% - 70px);
+          border-radius: 6px;
+        }
+      }
+
+      /* 媒体查询 - 超小屏幕 */
+      @media (max-width: 320px) {
+        .header h1 {
+          font-size: 1.2rem;
+        }
+
+        .game-section,
+        .medical-section {
+          height: 45vh;
+          min-height: 300px;
+          padding: 10px;
+        }
+
+        .instructions {
+          font-size: 10px;
+          padding: 6px;
+        }
+
+        .section-title {
+          font-size: 13px;
+        }
+      }
+
+      /* 横屏模式优化 */
+      @media (max-height: 500px) and (orientation: landscape) {
+        body {
+          padding: 5px;
+        }
+
+        .header {
+          margin-bottom: 10px;
+        }
+
+        .header h1 {
+          font-size: 1.3rem;
+          margin-bottom: 5px;
+        }
+
+        .demo-section {
+          flex-direction: row;
+          height: calc(100vh - 120px);
+          gap: 10px;
+        }
+
+        .game-section,
+        .medical-section {
+          width: 50%;
+          height: 100%;
+          min-height: auto;
+        }
+
+        .instructions {
+          font-size: 11px;
+          padding: 8px;
+          margin-bottom: 10px;
+        }
+      }
+
+      /* 确保内容不会溢出 */
+      .game-section,
+      .medical-section {
+        overflow: hidden;
+      }
+
+      iframe {
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      /* 高分辨率屏幕优化 */
+      @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .game-section,
+        .medical-section {
+          border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎮 游戏数据实时上传演示</h1>
+        <p>手势控制打砖块游戏 → 医护工作站数据同步</p>
+      </div>
+
+      <div class="instructions">
+        <strong>使用说明：</strong><br />
+        1. 左侧开始游戏，每30秒会自动上传得分和时长数据到李阿姨的记录中<br />
+        2. 右侧医护工作站会实时显示更新通知和累计数据<br />
+        3. 数据会自动保存，刷新页面后数据仍然保留<br />
+        4. 所有患者的训练时长已改为"小时分钟秒"格式
+      </div>
+
+      <div class="demo-section">
+        <div class="game-section">
+          <div class="section-title">🎮 手势控制打砖块游戏</div>
+          <div class="status">
+            <div class="status-dot"></div>
+            每30秒自动上传数据到医护工作站
+          </div>
+          <iframe src="dazhuankuai.html" title="打砖块游戏"></iframe>
+        </div>
+
+        <div class="medical-section">
+          <div class="section-title">🏥 医护工作站 - 李阿姨数据</div>
+          <div class="status">
+            <div class="status-dot"></div>
+            实时接收游戏数据并累加保存
+          </div>
+          <iframe src="yihu.html" title="医护工作站"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 监听来自iframe的消息
+      window.addEventListener("message", function (event) {
+        console.log("收到消息:", event.data);
+      });
+
+      // 显示连接状态
+      console.log("演示页面已加载，数据传输通道已建立");
+    </script>
+  </body>
+</html>

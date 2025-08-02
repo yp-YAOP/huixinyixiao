@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>慧心康复训练中心 - 患者门户</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="huanzhe.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- 直接显示游戏选择界面 -->
+    <div id="gameScreen" class="game-screen">
+      <header class="game-header">
+        <div class="header-content">
+          <div class="user-info">
+            <div class="user-avatar">
+              <span id="userInitial">李</span>
+            </div>
+            <div class="user-details">
+              <h2 id="userName">李阿姨</h2>
+              <p id="userStatus">康复训练中</p>
+            </div>
+          </div>
+          
+          <div class="header-actions">
+            <button onclick="showProfile()" class="profile-btn">个人信息</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="game-selection">
+        <div class="selection-header">
+          <h1>康复训练项目</h1>
+          <p>请选择适合您的训练项目，开始康复之旅</p>
+        </div>
+
+        <div class="game-grid">
+          <a href="#" onclick="startGame('brick')" class="game-card coordination-card">
+            <div class="card-icon">🎯</div>
+            <div class="card-content">
+              <h3>手眼协调训练</h3>
+              <p>通过动态追踪游戏，提升反应速度与手眼协调能力</p>
+            </div>
+            <div class="card-arrow">→</div>
+          </a>
+
+          <a href="#" onclick="startGame('fruit')" class="game-card reaction-card">
+            <div class="card-icon">🍎</div>
+            <div class="card-content">
+              <h3>反应速度训练</h3>
+              <p>通过手势切割水果，提升反应速度和动作敏捷性</p>
+            </div>
+            <div class="card-arrow">→</div>
+          </a>
+
+          <a href="#" onclick="startGame('cognitive')" class="game-card cognitive-card">
+            <div class="card-icon">🧠</div>
+            <div class="card-content">
+              <h3>认知能力训练</h3>
+              <p>通过记忆和逻辑游戏，提升认知功能和记忆能力</p>
+            </div>
+            <div class="card-arrow">→</div>
+          </a>
+        </div>
+      </main>
+    </div>
+
+    <!-- 个人信息模态框 -->
+    <div id="profileModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>个人信息</h3>
+          <button onclick="closeProfile()" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="profile-info">
+            <div class="info-item">
+              <label>姓名</label>
+              <span id="profileName">李阿姨</span>
+            </div>
+            <div class="info-item">
+              <label>年龄</label>
+              <span id="profileAge">65岁</span>
+            </div>
+            <div class="info-item">
+              <label>性别</label>
+              <span id="profileGender">女</span>
+            </div>
+            <div class="info-item">
+              <label>联系电话</label>
+              <span id="profilePhone">138****8888</span>
+            </div>
+            <div class="info-item">
+              <label>注册日期</label>
+              <span id="profileDate">2024-01-15</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 显示个人信息
+      function showProfile() {
+        document.getElementById('profileModal').classList.remove('hidden');
+      }
+
+      // 关闭个人信息
+      function closeProfile() {
+        document.getElementById('profileModal').classList.add('hidden');
+      }
+
+      // 启动游戏
+      function startGame(gameType) {
+        // 获取当前服务器地址
+        const currentUrl = window.location.origin;
+        
+        // 构造游戏URL
+        let gameUrl;
+        switch(gameType) {
+          case 'brick':
+            gameUrl = `${currentUrl}/game/brick`;
+            break;
+          case 'fruit':
+            gameUrl = `${currentUrl}/game/fruit`;
+            break;
+          case 'cognitive':
+            gameUrl = `${currentUrl}/game/cognitive`;
+            break;
+          default:
+            console.error('未知的游戏类型:', gameType);
+            return;
+        }
+        
+        // 添加服务器参数
+        gameUrl += `?server=${encodeURIComponent(currentUrl)}`;
+        
+        // 跳转到游戏页面
+        window.location.href = gameUrl;
+      }
+
+      // 页面加载完成后的初始化
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('患者门户已加载');
+        
+        // 检查是否通过网络访问
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          console.log('通过网络访问，服务器地址:', window.location.origin);
+        }
+      });
+    </script>
+  </body>
+</html>

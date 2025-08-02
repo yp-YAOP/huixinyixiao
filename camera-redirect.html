@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摄像头功能需要HTTPS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+        .message {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .info-box {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .info-box h3 {
+            color: #ffc107;
+            margin-bottom: 10px;
+        }
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .info-box li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .info-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .countdown {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="icon">📹</span>
+        <h1>摄像头功能需要HTTPS安全连接</h1>
+        
+        <div class="message">
+            <p>您当前使用的是HTTP连接，现代浏览器出于安全考虑，仅允许在HTTPS环境下访问摄像头。</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>🔒 为什么需要HTTPS？</h3>
+            <ul>
+                <li>保护用户隐私和数据安全</li>
+                <li>防止摄像头被恶意网站滥用</li>
+                <li>符合现代Web安全标准</li>
+                <li>确保手势识别功能正常工作</li>
+            </ul>
+        </div>
+        
+        <div class="buttons">
+            <a href="#" id="httpsLink" class="btn btn-primary">
+                🔐 切换到HTTPS版本
+            </a>
+            <a href="#" onclick="window.history.back()" class="btn btn-secondary">
+                ⬅️ 返回上一页
+            </a>
+        </div>
+        
+        <div class="countdown" id="countdown"></div>
+    </div>
+
+    <script>
+        // 生成HTTPS链接
+        const currentUrl = window.location.href;
+        const httpsUrl = currentUrl.replace('http://', 'https://').replace(':3000', ':3443');
+        document.getElementById('httpsLink').href = httpsUrl;
+        
+        // 倒计时自动跳转
+        let countdown = 10;
+        const countdownElement = document.getElementById('countdown');
+        
+        function updateCountdown() {
+            if (countdown > 0) {
+                countdownElement.textContent = `${countdown} 秒后自动跳转到HTTPS版本...`;
+                countdown--;
+                setTimeout(updateCountdown, 1000);
+            } else {
+                window.location.href = httpsUrl;
+            }
+        }
+        
+        // 检查是否需要自动跳转
+        if (window.location.protocol === 'http:' && 
+            window.location.hostname !== 'localhost' && 
+            window.location.hostname !== '127.0.0.1') {
+            updateCountdown();
+        } else {
+            countdownElement.textContent = '点击上方按钮切换到HTTPS版本';
+        }
+
+        // 检测用户操作，停止自动跳转
+        document.addEventListener('click', function() {
+            countdown = 0;
+            countdownElement.textContent = '自动跳转已停止';
+        });
+        
+        document.addEventListener('keydown', function() {
+            countdown = 0;
+            countdownElement.textContent = '自动跳转已停止';
+        });
+    </script>
+</body>
+</html>

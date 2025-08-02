@@ -1,0 +1,2994 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 防止缓存的meta标签 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <!-- 版本号用于缓存控制 -->
+    <meta name="version" content="2.0.1" />
+    <title>慧心一孝 - 医护工作站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- 全局错误处理和浏览器兼容性脚本 -->
+    <script>
+      // 全局错误处理
+      window.addEventListener('error', function(e) {
+        console.error('❌ 全局JavaScript错误:', e.error);
+        console.error('错误位置:', e.filename + ':' + e.lineno + ':' + e.colno);
+        
+        // 如果是连接相关的错误，显示友好提示
+        if (e.error && e.error.message && e.error.message.includes('EventSource')) {
+          setTimeout(() => {
+            alert('网络连接模块出现问题，请刷新页面重试\n\n建议：\n1. 按 Ctrl+F5 强制刷新\n2. 清除浏览器缓存\n3. 重启浏览器');
+          }, 1000);
+        }
+      });
+      
+      // 未处理的Promise拒绝
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('❌ 未处理的Promise拒绝:', e.reason);
+        e.preventDefault(); // 防止在控制台显示
+      });
+      
+      // 检测浏览器兼容性
+      (function() {
+        const isEdge = navigator.userAgent.includes('Edg/');
+        const isChrome = navigator.userAgent.includes('Chrome/');
+        const isFirefox = navigator.userAgent.includes('Firefox/');
+        
+        console.log('🌐 浏览器检测:', {
+          userAgent: navigator.userAgent,
+          isEdge,
+          isChrome,
+          isFirefox,
+          eventSourceSupport: typeof EventSource !== 'undefined',
+          fetchSupport: typeof fetch !== 'undefined'
+        });
+        
+        // 为Edge浏览器添加特殊处理
+        if (isEdge) {
+          console.log('🔧 Edge浏览器检测到，应用兼容性修复...');
+          // Edge浏览器的特殊处理
+          window.edgeBrowser = true;
+        }
+      })();
+    </script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              apple: [
+                "-apple-system",
+                "BlinkMacSystemFont",
+                "Inter",
+                "sans-serif",
+              ],
+            },
+            colors: {
+              "apple-blue": "#007AFF",
+              "apple-gray-1": "#F2F2F7",
+              "apple-gray-2": "#E5E5EA",
+              "apple-gray-3": "#D1D1D6",
+              "apple-gray-4": "#C7C7CC",
+              "apple-gray-5": "#AEAEB2",
+              "apple-gray-6": "#8E8E93",
+              "apple-green": "#34C759",
+              "apple-orange": "#FF9500",
+              "apple-red": "#FF3B30",
+            },
+            spacing: {
+              18: "4.5rem",
+              22: "5.5rem",
+            },
+            animation: {
+              "fade-in": "fadeIn 0.6s ease-out",
+              "slide-in": "slideIn 0.4s ease-out",
+              "pulse-gentle": "pulseGentle 2s infinite",
+            },
+            backdropBlur: {
+              xs: "2px",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes pulseGentle {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+
+      .card-apple {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06),
+          0 1px 4px rgba(0, 0, 0, 0.04);
+      }
+
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .status-idle {
+        background-color: #8e8e93;
+      }
+      .status-training {
+        background-color: #34c759;
+        animation: pulseGentle 2s infinite;
+      }
+
+      .patient-item {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .patient-item:hover {
+        transform: translateX(4px);
+        background-color: rgba(247, 247, 247, 0.8);
+      }
+
+      .patient-item.active {
+        background: linear-gradient(135deg, #007aff 0%, #0056cc 100%);
+        color: white;
+        transform: translateX(8px);
+      }
+
+      .patient-item.active .status-indicator {
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+      }
+
+      .kpi-card {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 122, 255, 0.02) 0%,
+          rgba(0, 122, 255, 0.05) 100%
+        );
+        border: 1px solid rgba(0, 122, 255, 0.1);
+      }
+
+      .notification-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-left: 3px solid #ff9500;
+        animation: slideIn 0.4s ease-out;
+      }
+
+      .button-apple {
+        background: linear-gradient(135deg, #007aff 0%, #0056cc 100%);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .button-apple:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(0, 122, 255, 0.3);
+      }
+
+      .icon-button {
+        transition: all 0.2s ease;
+      }
+
+      .icon-button:hover {
+        transform: scale(1.1);
+      }
+
+      /* 可调整大小的侧边栏样式 */
+      .resizable-sidebar {
+        position: relative;
+        transition: width 0.3s ease;
+        min-width: 60px;
+        max-width: 500px;
+      }
+
+      .resizable-sidebar.collapsed {
+        width: 60px !important;
+        cursor: pointer;
+      }
+
+      .resizable-sidebar.collapsed:hover {
+        background: rgba(255, 255, 255, 0.8);
+      }
+
+      .resize-handle {
+        position: absolute;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: transparent;
+        cursor: col-resize;
+        z-index: 10;
+        transition: background-color 0.2s ease;
+      }
+
+      .resize-handle:hover {
+        background-color: rgba(0, 122, 255, 0.3);
+      }
+
+      .resize-handle.active {
+        background-color: rgba(0, 122, 255, 0.5);
+      }
+
+      .resize-handle.left {
+        right: 0;
+      }
+
+      .resize-handle.right {
+        left: 0;
+      }
+
+      .sidebar-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .collapse-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: rgba(0, 122, 255, 0.1);
+        border: none;
+        color: #007aff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+      }
+
+      .collapse-btn:hover {
+        background: rgba(0, 122, 255, 0.2);
+        transform: scale(1.1);
+      }
+
+      .sidebar-content {
+        overflow: hidden;
+        transition: opacity 0.2s ease;
+      }
+
+      .resizable-sidebar.collapsed .sidebar-content {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .resizable-sidebar.collapsed .sidebar-header h2 {
+        opacity: 0;
+      }
+
+      .resizable-sidebar.collapsed .sidebar-header > div:first-child {
+        opacity: 0;
+      }
+
+      /* 确保折叠按钮在折叠状态下仍然可见和可点击 */
+      .resizable-sidebar.collapsed .collapse-btn {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        background: rgba(0, 122, 255, 0.15) !important;
+        box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+        width: 24px;
+        height: 24px;
+      }
+
+      .resizable-sidebar.collapsed .collapse-btn:hover {
+        background: rgba(0, 122, 255, 0.25) !important;
+        transform: translateX(-50%) scale(1.05);
+      }
+
+      .collapsed-indicator {
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        transform: translate(-50%, 0) rotate(-90deg);
+        font-size: 10px;
+        font-weight: 600;
+        color: #007aff;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        cursor: pointer;
+        user-select: none;
+        transform-origin: center;
+      }
+
+      .resizable-sidebar.collapsed .collapsed-indicator {
+        opacity: 0.7;
+      }
+
+      .resizable-sidebar.collapsed:hover .collapsed-indicator {
+        opacity: 1;
+      }
+
+      /* 添加展开提示 */
+      .expand-hint {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 8px;
+        color: #007aff;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        line-height: 1.1;
+        width: 36px;
+      }
+
+      .resizable-sidebar.collapsed .expand-hint {
+        opacity: 0.4;
+      }
+
+      .resizable-sidebar.collapsed:hover .expand-hint {
+        opacity: 0.7;
+      }
+
+      /* 折叠状态下的特殊布局 */
+      .resizable-sidebar.collapsed .sidebar-header {
+        position: relative;
+        height: 100vh;
+      }
+
+      /* 抽屉样式 */
+      .drawer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+      }
+
+      .drawer.open {
+        max-height: 200px;
+      }
+
+      .drawer-toggle {
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .drawer-toggle.open {
+        transform: rotate(180deg);
+      }
+
+      .game-detail-item {
+        padding: 8px 12px;
+        margin: 4px 0;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .game-detail-item .game-name {
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .game-detail-item .game-value {
+        font-weight: 600;
+        color: #111827;
+      }
+    </style>
+  </head>
+
+  <body class="bg-apple-gray-1 font-apple antialiased">
+    <!-- 顶部导航栏 -->
+    <nav class="glass-effect border-b border-apple-gray-3/30 sticky top-0 z-50">
+      <div class="px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div
+              class="w-10 h-10 bg-gradient-to-br from-apple-blue to-blue-600 rounded-xl flex items-center justify-center shadow-lg"
+            >
+              <i data-lucide="heart-pulse" class="text-white w-5 h-5"></i>
+            </div>
+            <div>
+              <h1 class="text-xl font-semibold text-gray-900 tracking-tight">
+                慧心一孝
+              </h1>
+              <p class="text-sm text-apple-gray-6 font-medium">医护工作站</p>
+            </div>
+          </div>
+
+          <!-- 右侧用户信息 -->
+          <div class="flex items-center space-x-4">
+            <!-- 网络状态 -->
+            <div class="flex items-center space-x-2 px-3 py-2 bg-white/50 rounded-lg border">
+              <div id="network-status" class="status-indicator status-idle"></div>
+              <span id="network-text" class="text-xs text-apple-gray-6 font-medium">未连接</span>
+              <button
+                id="network-settings-btn"
+                class="icon-button p-1 rounded hover:bg-apple-gray-2/50"
+                title="网络设置"
+                onclick="toggleNetworkSettings()"
+              >
+                <i data-lucide="settings" class="w-3 h-3 text-apple-gray-6"></i>
+              </button>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-3">
+              <div class="text-right">
+                <p class="text-sm font-semibold text-gray-900">陈医生</p>
+                <p class="text-xs text-apple-gray-6">康复科主任</p>
+              </div>
+              <div
+                class="w-10 h-10 bg-gradient-to-br from-apple-gray-4 to-apple-gray-5 rounded-full flex items-center justify-center"
+              >
+                <i data-lucide="user" class="text-white w-5 h-5"></i>
+              </div>
+            </div>
+
+            <!-- 通知图标 -->
+            <button
+              class="icon-button relative p-2 rounded-lg hover:bg-apple-gray-2/50"
+            >
+              <i data-lucide="bell" class="w-5 h-5 text-apple-gray-6"></i>
+              <span
+                class="absolute -top-1 -right-1 w-3 h-3 bg-apple-red rounded-full"
+              ></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="flex h-screen">
+      <!-- 左侧边栏：患者列表 -->
+      <div
+        id="patient-sidebar"
+        class="resizable-sidebar w-80 bg-white/70 backdrop-blur-sm border-r border-apple-gray-3/30 overflow-y-auto"
+      >
+        <!-- 拖拽调整大小的控制条 -->
+        <div class="resize-handle left" id="patient-resize-handle"></div>
+
+        <div class="p-6">
+          <div class="sidebar-header mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 tracking-tight">
+              我的患者
+            </h2>
+            <div class="flex items-center space-x-2">
+              <span
+                id="patient-count"
+                class="bg-apple-blue/10 text-apple-blue text-xs font-medium px-3 py-1 rounded-full"
+              >
+                加载中...
+              </span>
+              <button
+                class="collapse-btn"
+                id="patient-collapse-btn"
+                title="收起/展开"
+              >
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="collapsed-indicator">我的患者</div>
+            <div class="expand-hint">点击<br />展开</div>
+          </div>
+
+          <div class="sidebar-content">
+            <!-- 搜索框 -->
+            <div class="mb-6">
+              <div class="relative">
+                <i
+                  data-lucide="search"
+                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-apple-gray-6"
+                ></i>
+                <input
+                  type="text"
+                  placeholder="搜索患者..."
+                  class="w-full pl-10 pr-4 py-3 bg-apple-gray-1 border border-apple-gray-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue transition-all duration-200"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-2" id="patient-list">
+              <!-- 患者列表项将通过JavaScript动态生成 -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主内容区：患者详情仪表盘 -->
+      <div
+        class="flex-1 overflow-y-auto bg-gradient-to-br from-white/50 to-apple-gray-1/50"
+      >
+        <div class="p-8">
+          <!-- 默认提示信息 -->
+          <div id="default-view" class="text-center py-20 animate-fade-in">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-apple-blue/10 to-apple-blue/20 rounded-full flex items-center justify-center mx-auto mb-6"
+            >
+              <i
+                data-lucide="stethoscope"
+                class="w-12 h-12 text-apple-blue"
+              ></i>
+            </div>
+            <h3
+              class="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"
+            >
+              欢迎使用医护工作站
+            </h3>
+            <p class="text-apple-gray-6 text-lg">
+              请从左侧选择一位患者查看详细信息
+            </p>
+          </div>
+
+          <!-- 患者详情内容 -->
+          <div id="patient-detail" class="hidden animate-fade-in">
+            <!-- 患者基本信息卡片 -->
+            <div class="card-apple rounded-2xl p-8 mb-8">
+              <div class="flex items-center space-x-6">
+                <div
+                  class="w-20 h-20 bg-gradient-to-br from-apple-blue/10 to-apple-blue/20 rounded-2xl flex items-center justify-center"
+                >
+                  <i data-lucide="user" class="text-apple-blue w-8 h-8"></i>
+                </div>
+                <div class="flex-1">
+                  <h2
+                    id="patient-name"
+                    class="text-3xl font-bold text-gray-900 mb-2 tracking-tight"
+                  >
+                    患者姓名
+                  </h2>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div class="flex items-center space-x-2">
+                      <i
+                        data-lucide="calendar"
+                        class="w-4 h-4 text-apple-gray-6"
+                      ></i>
+                      <span class="text-apple-gray-6">年龄：</span>
+                      <span id="patient-age" class="font-medium text-gray-900"
+                        >--</span
+                      >
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <i
+                        data-lucide="activity"
+                        class="w-4 h-4 text-apple-gray-6"
+                      ></i>
+                      <span class="text-apple-gray-6">阶段：</span>
+                      <span id="patient-stage" class="font-medium text-gray-900"
+                        >--</span
+                      >
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <i
+                        data-lucide="clipboard-list"
+                        class="w-4 h-4 text-apple-gray-6"
+                      ></i>
+                      <span class="text-apple-gray-6">诊断：</span>
+                      <span
+                        id="patient-diagnosis"
+                        class="font-medium text-gray-900"
+                        >--</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KPI 概览卡片网格 -->
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+            >
+              <div class="kpi-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-apple-gray-6 mb-1">
+                      累计训练时长
+                    </p>
+                    <p
+                      id="total-duration"
+                      class="text-2xl font-bold text-gray-900 tracking-tight"
+                    >
+                      --
+                    </p>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <div
+                      class="w-12 h-12 bg-apple-blue/10 rounded-xl flex items-center justify-center"
+                    >
+                      <i data-lucide="clock" class="w-6 h-6 text-apple-blue"></i>
+                    </div>
+                    <button
+                      class="drawer-toggle w-6 h-6 flex items-center justify-center text-apple-gray-6 hover:text-apple-blue"
+                      onclick="toggleDrawer('duration-drawer')"
+                    >
+                      <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- 训练时长详细抽屉 -->
+                <div id="duration-drawer" class="drawer mt-4">
+                  <div class="space-y-2">
+                    <div class="game-detail-item">
+                      <span class="game-name">反应速度训练</span>
+                      <span id="fruit-duration" class="game-value">--</span>
+                    </div>
+                    <div class="game-detail-item">
+                      <span class="game-name">认知能力训练</span>
+                      <span id="number-duration" class="game-value">--</span>
+                    </div>
+                    <div class="game-detail-item">
+                      <span class="game-name">手眼协调训练</span>
+                      <span id="hand-duration" class="game-value">--</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-apple-gray-6 mb-1">
+                      平均标准率
+                    </p>
+                    <p
+                      id="avg-accuracy"
+                      class="text-2xl font-bold text-gray-900 tracking-tight"
+                    >
+                      --
+                    </p>
+                  </div>
+                  <div
+                    class="w-12 h-12 bg-apple-green/10 rounded-xl flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="target"
+                      class="w-6 h-6 text-apple-green"
+                    ></i>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-apple-gray-6 mb-1">
+                      本周得分
+                    </p>
+                    <p
+                      id="week-score"
+                      class="text-2xl font-bold text-gray-900 tracking-tight"
+                    >
+                      --
+                    </p>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <div
+                      class="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center"
+                    >
+                      <i data-lucide="trophy" class="w-6 h-6 text-yellow-600"></i>
+                    </div>
+                    <button
+                      class="drawer-toggle w-6 h-6 flex items-center justify-center text-apple-gray-6 hover:text-apple-blue"
+                      onclick="toggleDrawer('score-drawer')"
+                    >
+                      <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- 本周得分详细抽屉 -->
+                <div id="score-drawer" class="drawer mt-4">
+                  <div class="space-y-2">
+                    <div class="game-detail-item">
+                      <span class="game-name">反应速度训练</span>
+                      <span id="fruit-score" class="game-value">--</span>
+                    </div>
+                    <div class="game-detail-item">
+                      <span class="game-name">认知能力训练</span>
+                      <span id="number-score" class="game-value">--</span>
+                    </div>
+                    <div class="game-detail-item">
+                      <span class="game-name">手眼协调训练</span>
+                      <span id="hand-score" class="game-value">--</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="kpi-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-apple-gray-6 mb-1">
+                      康复进度
+                    </p>
+                    <p
+                      id="progress-rate"
+                      class="text-2xl font-bold text-gray-900 tracking-tight"
+                    >
+                      --
+                    </p>
+                  </div>
+                  <div
+                    class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="trending-up"
+                      class="w-6 h-6 text-purple-600"
+                    ></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 康复进度与能力阶段图表 -->
+            <div class="card-apple rounded-2xl p-8 mb-8">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-gray-900 tracking-tight">
+                  <i
+                    data-lucide="trending-up"
+                    class="inline w-5 h-5 mr-2 text-apple-blue"
+                  ></i>
+                  康复进度与功能能力
+                </h3>
+                <div class="flex space-x-2">
+                  <button
+                    class="px-3 py-1 text-sm bg-apple-blue text-white rounded-lg font-medium"
+                  >
+                    7天
+                  </button>
+                  <button
+                    class="px-3 py-1 text-sm text-apple-gray-6 hover:bg-apple-gray-2 rounded-lg font-medium transition-colors"
+                  >
+                    3天
+                  </button>
+                </div>
+              </div>
+              <div class="h-96">
+                <canvas id="progress-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- 训练日志 -->
+              <div class="card-apple rounded-2xl p-8">
+                <h3
+                  class="text-xl font-semibold text-gray-900 mb-6 tracking-tight"
+                >
+                  <i
+                    data-lucide="list"
+                    class="inline w-5 h-5 mr-2 text-apple-blue"
+                  ></i>
+                  训练记录
+                </h3>
+                <div class="space-y-4" id="training-logs">
+                  <!-- 训练记录将通过JavaScript填充 -->
+                </div>
+              </div>
+
+              <!-- AI风险分析 -->
+              <div class="card-apple rounded-2xl p-8">
+                <h3
+                  class="text-xl font-semibold text-gray-900 mb-6 tracking-tight"
+                >
+                  <i
+                    data-lucide="brain"
+                    class="inline w-5 h-5 mr-2 text-apple-blue"
+                  ></i>
+                  AI风险分析
+                </h3>
+                <div id="risk-analysis" class="space-y-4">
+                  <!-- 风险分析项将通过JavaScript填充 -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 康复计划管理 -->
+            <div class="card-apple rounded-2xl p-8 mt-8">
+              <h3
+                class="text-xl font-semibold text-gray-900 mb-6 tracking-tight"
+              >
+                <i
+                  data-lucide="calendar-check"
+                  class="inline w-5 h-5 mr-2 text-apple-blue"
+                ></i>
+                康复计划管理
+              </h3>
+              <div class="bg-apple-gray-1/50 rounded-xl p-6 mb-6">
+                <p id="current-plan" class="text-gray-700 leading-relaxed">
+                  当前康复计划加载中...
+                </p>
+              </div>
+              <button
+                class="button-apple text-white px-6 py-3 rounded-xl font-medium inline-flex items-center space-x-2"
+              >
+                <i data-lucide="edit" class="w-4 h-4"></i>
+                <span>调整计划</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧边栏：实时事件与通知 -->
+      <div
+        id="notification-sidebar"
+        class="resizable-sidebar w-80 bg-white/70 backdrop-blur-sm border-l border-apple-gray-3/30 overflow-y-auto"
+      >
+        <!-- 拖拽调整大小的控制条 -->
+        <div class="resize-handle right" id="notification-resize-handle"></div>
+
+        <div class="p-6">
+          <div class="sidebar-header mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 tracking-tight">
+              实时通知
+            </h2>
+            <div class="flex items-center space-x-2">
+              <div class="flex items-center space-x-2">
+                <div id="ws-status" class="status-indicator status-idle"></div>
+                <span class="text-xs text-apple-gray-6 font-medium"
+                  >连接状态</span
+                >
+              </div>
+              <button
+                class="collapse-btn"
+                id="notification-collapse-btn"
+                title="收起/展开"
+              >
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="collapsed-indicator">实时通知</div>
+            <div class="expand-hint">点击<br />展开</div>
+          </div>
+
+          <div class="sidebar-content">
+            <div id="notifications" class="space-y-4">
+              <div class="text-center py-12">
+                <div
+                  class="w-16 h-16 bg-apple-gray-2 rounded-full flex items-center justify-center mx-auto mb-4"
+                >
+                  <i data-lucide="bell" class="w-8 h-8 text-apple-gray-5"></i>
+                </div>
+                <p class="text-apple-gray-6">暂无实时事件</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 网络设置面板 -->
+    <div id="network-settings-panel" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+      <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-gray-900">网络设置</h3>
+          <button
+            onclick="toggleNetworkSettings()"
+            class="icon-button p-2 rounded-lg hover:bg-apple-gray-2"
+          >
+            <i data-lucide="x" class="w-5 h-5 text-apple-gray-6"></i>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">服务器地址</label>
+            <input
+              id="server-url-input"
+              type="text"
+              placeholder="自动检测中..."
+              class="w-full px-4 py-3 border border-apple-gray-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue"
+              value=""
+              readonly
+            />
+            <p class="text-xs text-apple-gray-6 mt-1">系统将自动检测并连接到同一局域网内的服务器</p>
+          </div>
+          
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <label class="text-sm font-medium text-gray-700">自动同步</label>
+              <p class="text-xs text-apple-gray-6">每15秒自动获取最新数据</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="auto-sync-toggle" type="checkbox" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-apple-blue/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-apple-blue"></div>
+            </label>
+          </div>
+          
+          <div class="flex space-x-3">
+            <button
+              onclick="reDetectServer()"
+              class="flex-1 px-4 py-3 bg-apple-gray-2 text-gray-700 rounded-xl font-medium hover:bg-apple-gray-3 transition-colors"
+            >
+              重新检测
+            </button>
+            <button
+              onclick="connectToNetwork()"
+              class="flex-1 button-apple text-white px-4 py-3 rounded-xl font-medium"
+            >
+              连接
+            </button>
+          </div>
+          
+          <div id="network-status-info" class="p-3 bg-apple-gray-1 rounded-xl hidden">
+            <div class="flex items-center space-x-2">
+              <div id="connection-indicator" class="status-indicator status-idle"></div>
+              <span id="connection-status-text" class="text-sm text-gray-700">等待连接...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 初始化Lucide图标
+      lucide.createIcons();
+
+      // 全局变量
+      let currentPatientId = null;
+      let progressChart = null;
+      let websocket = null;
+      
+      // 网络传输相关变量
+      let networkConfig = {
+        serverUrl: '',
+        connected: false,
+        eventSource: null,
+        autoSync: true,
+        syncInterval: 15000, // 15秒
+        autoDetection: true
+      };
+      let networkSyncTimer = null;
+
+      // 模拟数据
+      const mockPatients = [
+        { id: 101, name: "王大爷", age: 72, status: "idle" },
+        { id: 102, name: "李阿姨", age: 68, status: "training" },
+        { id: 103, name: "张先生", age: 65, status: "idle" },
+        { id: 104, name: "陈奶奶", age: 74, status: "idle" },
+        { id: 105, name: "赵叔叔", age: 69, status: "idle" },
+      ];
+
+      // 功能能力阶段定义
+      const capabilityThresholds = [
+        { threshold: 20, capability: "基础意识", color: "rgba(142, 142, 147, 0.8)" },
+        { threshold: 30, capability: "肢体感知", color: "rgba(255, 45, 85, 0.8)" },
+        { threshold: 40, capability: "简单动作", color: "rgba(255, 59, 48, 0.8)" },
+        { threshold: 50, capability: "基础感知", color: "rgba(255, 149, 0, 0.8)" },
+        { threshold: 60, capability: "手指弯曲", color: "rgba(255, 204, 0, 0.8)" },
+        { threshold: 70, capability: "抓握能力", color: "rgba(52, 199, 89, 0.8)" },
+        { threshold: 80, capability: "开门把手", color: "rgba(30, 132, 255, 0.8)" },
+        { threshold: 90, capability: "精细操作", color: "rgba(0, 122, 255, 0.8)" },
+        { threshold: 95, capability: "复杂动作", color: "rgba(175, 82, 222, 0.8)" }
+      ];
+
+      const mockPatientReports = {
+        101: {
+          patientInfo: {
+            id: 101,
+            name: "王大爷",
+            age: 72,
+            stage: "恢复中期",
+            diagnosis: "左侧偏瘫",
+          },
+          overview: {
+            totalDuration: "8小时35分42秒",
+            avgAccuracy: "92%",
+            thisWeekScore: 850,
+            scoreTrend: [75, 78, 82, 85, 83, 88, 91],
+          },
+          gameDetails: {
+            fruit: { duration: "2小时50分20秒", score: 280 },
+            number: { duration: "2小时55分12秒", score: 290 },
+            hand: { duration: "2小时50分10秒", score: 280 }
+          },
+          trainingLogs: [
+            {
+              date: "2025-07-26",
+              game: "水果忍者康复版",
+              score: 95,
+              completion: "100%",
+              duration: "30分钟",
+            },
+            {
+              date: "2025-07-25",
+              game: "数字认知训练",
+              score: 88,
+              completion: "98%",
+              duration: "25分钟",
+            },
+            {
+              date: "2025-07-24",
+              game: "手部精细动作",
+              score: 92,
+              completion: "95%",
+              duration: "35分钟",
+            },
+            {
+              date: "2025-07-23",
+              game: "平衡感训练",
+              score: 87,
+              completion: "100%",
+              duration: "28分钟",
+            },
+          ],
+          riskAnalysis: [
+            { action: "上肢外展", error: "角度不足", count: 15 },
+            { action: "手腕旋转", error: "速度过快", count: 8 },
+            { action: "握力训练", error: "持续时间不够", count: 5 },
+          ],
+          currentPlan:
+            "每日进行上肢力量训练30分钟，认知训练15分钟，配合平衡感协调训练。",
+        },
+        102: {
+          patientInfo: {
+            id: 102,
+            name: "李阿姨",
+            age: 68,
+            stage: "恢复初期",
+            diagnosis: "右侧肢体功能障碍",
+          },
+          overview: {
+            totalDuration: "3小时18分25秒",
+            avgAccuracy: "85%",
+            thisWeekScore: 720,
+            scoreTrend: [62, 65, 68, 72, 78, 82, 85],
+          },
+          gameDetails: {
+            fruit: { duration: "1小时8分15秒", score: 235 },
+            number: { duration: "1小时15分5秒", score: 245 },
+            hand: { duration: "55分15秒", score: 240 }
+          },
+          trainingLogs: [
+            {
+              date: "2025-07-26",
+              game: "基础手部运动",
+              score: 78,
+              completion: "90%",
+              duration: "25分钟",
+            },
+            {
+              date: "2025-07-25",
+              game: "认知反应训练",
+              score: 82,
+              completion: "95%",
+              duration: "20分钟",
+            },
+            {
+              date: "2025-07-24",
+              game: "协调性训练",
+              score: 75,
+              completion: "88%",
+              duration: "30分钟",
+            },
+          ],
+          riskAnalysis: [
+            { action: "手指抓握", error: "力度不够", count: 12 },
+            { action: "肩部运动", error: "幅度过小", count: 9 },
+          ],
+          currentPlan:
+            "基础康复训练为主，每日手部精细动作练习20分钟，肢体协调训练15分钟。",
+        },
+        103: {
+          patientInfo: {
+            id: 103,
+            name: "张先生",
+            age: 65,
+            stage: "恢复后期",
+            diagnosis: "脑梗后遗症",
+          },
+          overview: {
+            totalDuration: "12小时52分17秒",
+            avgAccuracy: "96%",
+            thisWeekScore: 920,
+            scoreTrend: [88, 90, 92, 94, 96, 96, 98],
+          },
+          gameDetails: {
+            fruit: { duration: "4小时17分25秒", score: 307 },
+            number: { duration: "4小时17分26秒", score: 306 },
+            hand: { duration: "4小时17分26秒", score: 307 }
+          },
+          trainingLogs: [
+            {
+              date: "2025-07-26",
+              game: "高级协调训练",
+              score: 98,
+              completion: "100%",
+              duration: "40分钟",
+            },
+            {
+              date: "2025-07-25",
+              game: "复杂认知任务",
+              score: 96,
+              completion: "100%",
+              duration: "35分钟",
+            },
+            {
+              date: "2025-07-24",
+              game: "精细运动控制",
+              score: 97,
+              completion: "98%",
+              duration: "45分钟",
+            },
+          ],
+          riskAnalysis: [
+            { action: "复杂动作序列", error: "偶有停顿", count: 3 },
+            { action: "双手协调", error: "轻微不同步", count: 2 },
+          ],
+          currentPlan:
+            "维持性训练，每日高级康复训练40分钟，认知功能强化训练20分钟。",
+        },
+        104: {
+          patientInfo: {
+            id: 104,
+            name: "陈奶奶",
+            age: 74,
+            stage: "恢复初期",
+            diagnosis: "认知功能障碍",
+          },
+          overview: {
+            totalDuration: "2小时25分30秒",
+            avgAccuracy: "78%",
+            thisWeekScore: 560,
+            scoreTrend: [48, 52, 55, 58, 65, 68, 72],
+          },
+          gameDetails: {
+            fruit: { duration: "48分10秒", score: 185 },
+            number: { duration: "50分15秒", score: 188 },
+            hand: { duration: "47分05秒", score: 187 }
+          },
+          trainingLogs: [
+            {
+              date: "2025-07-26",
+              game: "基础认知训练",
+              score: 72,
+              completion: "85%",
+              duration: "20分钟",
+            },
+            {
+              date: "2025-07-25",
+              game: "手部协调训练",
+              score: 68,
+              completion: "80%",
+              duration: "18分钟",
+            },
+          ],
+          riskAnalysis: [
+            { action: "记忆训练", error: "反应时间过长", count: 18 },
+            { action: "注意力集中", error: "容易分心", count: 15 },
+          ],
+          currentPlan:
+            "轻度认知训练为主，每日记忆训练15分钟，注意力训练10分钟。",
+        },
+        105: {
+          patientInfo: {
+            id: 105,
+            name: "赵叔叔",
+            age: 69,
+            stage: "恢复中期",
+            diagnosis: "运动功能障碍",
+          },
+          overview: {
+            totalDuration: "6小时16分48秒",
+            avgAccuracy: "89%",
+            thisWeekScore: 780,
+            scoreTrend: [68, 72, 75, 78, 82, 87, 89],
+          },
+          gameDetails: {
+            fruit: { duration: "2小时25分16秒", score: 260 },
+            number: { duration: "2小时25分18秒", score: 260 },
+            hand: { duration: "2小时25分14秒", score: 260 }
+          },
+          trainingLogs: [
+            {
+              date: "2025-07-26",
+              game: "运动协调训练",
+              score: 89,
+              completion: "95%",
+              duration: "35分钟",
+            },
+            {
+              date: "2025-07-25",
+              game: "平衡感训练",
+              score: 85,
+              completion: "92%",
+              duration: "30分钟",
+            },
+          ],
+          riskAnalysis: [
+            { action: "平衡控制", error: "稳定性不足", count: 8 },
+            { action: "步态训练", error: "步幅不均", count: 6 },
+          ],
+          currentPlan:
+            "运动功能恢复训练，每日平衡训练25分钟，步态训练20分钟。",
+        },
+      };
+
+      // 页面初始化
+      // 页面初始化（改进版）
+      document.addEventListener("DOMContentLoaded", function () {
+        try {
+          console.log('🚀 页面开始初始化...');
+          
+          // 强制清除可能的缓存问题
+          if (window.performance && window.performance.navigation.type === 1) {
+            console.log('🔄 检测到页面刷新，清理缓存...');
+            try {
+              // 清理可能的连接残留
+              if (window.networkConfig && window.networkConfig.eventSource) {
+                window.networkConfig.eventSource.close();
+                window.networkConfig.eventSource = null;
+              }
+            } catch (e) {
+              console.warn('清理连接残留时出现问题:', e);
+            }
+          }
+          
+          loadPersistedPatientData(); // 加载持久化的患者数据
+          loadPatientList();
+          initWebSocket();
+          initGameDataReceiver();
+          loadGameDataFromStorage();
+          initResizableSidebars(); // 初始化可调整大小的侧边栏
+          
+          // 确保事件监听器正确绑定
+          bindEventListeners();
+          
+          // 延迟初始化网络连接，确保DOM完全加载
+          setTimeout(() => {
+            try {
+              initNetworkConnection(); // 初始化网络连接，包含自动检测
+            } catch (error) {
+              console.error('网络连接初始化失败:', error);
+            }
+          }, 500);
+          
+          console.log('✅ 页面初始化完成');
+        } catch (error) {
+          console.error('❌ 页面初始化过程出错:', error);
+          alert('页面初始化失败，请刷新页面重试');
+        }
+      });
+      
+      // 绑定事件监听器
+      function bindEventListeners() {
+        try {
+          console.log('🔗 绑定事件监听器...');
+          
+          // 确保连接按钮事件绑定
+          const connectBtn = document.querySelector('button[onclick="connectToNetwork()"]');
+          if (connectBtn) {
+            // 移除可能的旧事件监听器
+            connectBtn.onclick = null;
+            // 重新绑定
+            connectBtn.onclick = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🔗 连接按钮被点击');
+              connectToNetwork();
+            };
+          }
+          
+          // 确保重新检测按钮事件绑定
+          const reDetectBtn = document.querySelector('button[onclick="reDetectServer()"]');
+          if (reDetectBtn) {
+            // 移除可能的旧事件监听器
+            reDetectBtn.onclick = null;
+            // 重新绑定
+            reDetectBtn.onclick = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🔄 重新检测按钮被点击');
+              reDetectServer();
+            };
+          }
+          
+          // 页面卸载时清理连接
+          window.addEventListener('beforeunload', function() {
+            console.log('🧹 页面卸载，清理连接...');
+            cleanupConnection();
+          });
+          
+          // 页面可见性变化时的处理
+          document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+              console.log('📱 页面隐藏');
+            } else {
+              console.log('📱 页面显示');
+              // 页面重新显示时检查连接状态
+              if (networkConfig.serverUrl && !networkConfig.connected) {
+                console.log('🔄 页面重新显示，检查连接状态...');
+                setTimeout(() => {
+                  if (!networkConfig.connected) {
+                    console.log('🔗 自动重新连接...');
+                    connectToNetwork();
+                  }
+                }, 1000);
+              }
+            }
+          });
+          
+          console.log('✅ 事件监听器绑定完成');
+        } catch (error) {
+          console.error('❌ 绑定事件监听器失败:', error);
+        }
+      }
+
+      // 加载持久化的患者数据
+      function loadPersistedPatientData() {
+        try {
+          // 先清除旧的localStorage数据，使用新的模拟数据
+          localStorage.removeItem("yihu_patient_data");
+          console.log("已清除旧的患者数据，使用新的模拟数据");
+          
+          // 不再从localStorage加载数据，直接使用更新后的模拟数据
+          // const persistedData = localStorage.getItem("yihu_patient_data");
+          // if (persistedData) {
+          //   // 注释掉旧的数据加载逻辑
+          // }
+        } catch (error) {
+          console.error("处理持久化数据失败:", error);
+        }
+      }
+
+      // 保存患者数据到持久化存储
+      function savePatientDataToPersistence() {
+        try {
+          const dataToSave = {};
+          Object.keys(mockPatientReports).forEach((patientId) => {
+            dataToSave[patientId] = {
+              thisWeekScore:
+                mockPatientReports[patientId].overview.thisWeekScore,
+              totalDuration:
+                mockPatientReports[patientId].overview.totalDuration,
+              gameDetails: mockPatientReports[patientId].gameDetails,
+            };
+          });
+          localStorage.setItem("yihu_patient_data", JSON.stringify(dataToSave));
+          console.log("患者数据已保存到持久化存储");
+        } catch (error) {
+          console.error("保存持久化数据失败:", error);
+        }
+      }
+
+      // 本地数据监听器引用
+      let localDataCheckInterval = null;
+      let storageEventListener = null;
+      let postMessageListener = null;
+      
+      // 初始化游戏数据接收器
+      function initGameDataReceiver() {
+        // 清理已有的监听器
+        if (localDataCheckInterval) {
+          clearInterval(localDataCheckInterval);
+          localDataCheckInterval = null;
+        }
+        
+        // postMessage监听器
+        postMessageListener = function (event) {
+          if (event.data && event.data.type === "GAME_DATA_UPLOAD") {
+            // 仅在未连接网络时处理本地数据
+            if (!networkConfig.connected) {
+              console.log("接收到本地游戏数据:", event.data.data);
+              handleGameDataUpdate(event.data.data);
+            }
+          }
+        };
+        
+        // storage事件监听器
+        storageEventListener = function(event) {
+          if (event.key === 'gameUploadData' || event.key === null) {
+            // 仅在未连接网络时处理本地数据
+            if (!networkConfig.connected) {
+              console.log('检测到localStorage变化，立即检查新数据');
+              loadGameDataFromStorage();
+            }
+          }
+        };
+        
+        // 添加监听器
+        window.addEventListener("message", postMessageListener);
+        window.addEventListener('storage', storageEventListener);
+
+        // 仅在未连接网络时启用定期检查
+        if (!networkConfig.connected) {
+          localDataCheckInterval = setInterval(function () {
+            if (!networkConfig.connected) {
+              loadGameDataFromStorage();
+            }
+          }, 2000);
+        }
+
+        console.log('游戏数据接收器已初始化 - 网络状态:', networkConfig.connected ? '已连接' : '本地模式');
+      }
+
+      // 从localStorage加载游戏数据
+      function loadGameDataFromStorage() {
+        try {
+          const gameData = JSON.parse(
+            localStorage.getItem("gameUploadData") || "[]"
+          );
+          if (gameData.length > 0) {
+            gameData.forEach((data) => {
+              if (data.patientId === 102) {
+                // 李阿姨
+                handleGameDataUpdate(data);
+              }
+            });
+            // 清空已处理的数据
+            localStorage.removeItem("gameUploadData");
+            console.log("已处理游戏数据:", gameData.length, "条");
+          }
+        } catch (error) {
+          console.error("读取游戏数据失败:", error);
+        }
+      }
+
+      // 数据去重缓存 - 加强版本
+      const processedDataIds = new Set();
+      let lastProcessedTime = 0;
+      
+      // 处理游戏数据更新
+      function handleGameDataUpdate(data, skipNotification = false) {
+        if (data.patientId === 102) {
+          // 李阿姨
+          updatePatientGameData(data, skipNotification);
+        }
+      }
+
+      // 更新李阿姨的游戏数据
+      function updatePatientGameData(data, skipNotification = false) {
+        const report = mockPatientReports[102];
+        if (!report) return;
+
+        // 加强的数据去重逻辑
+        const currentTime = Date.now();
+        
+        // 生成更加唯一的数据ID
+        const dataId = `${data.patientId}-${data.gameType}-${data.scoreIncrease || 0}-${data.timeIncrease || 0}-${data.source || 'unknown'}-${Math.floor(currentTime / 1000)}`;
+        
+        // 防止过于频繁的数据处理（同一秒内最多处理一次）
+        if (currentTime - lastProcessedTime < 500) {
+          console.log('数据处理过于频繁，跳过:', dataId);
+          return;
+        }
+        
+        // 检查是否已处理过这个数据
+        if (processedDataIds.has(dataId)) {
+          console.log('数据已处理过，跳过重复处理:', dataId);
+          return;
+        }
+        
+        // 如果得分和时长增加都为0或undefined，跳过处理
+        if ((!data.scoreIncrease || data.scoreIncrease <= 0) && (!data.timeIncrease || data.timeIncrease <= 0)) {
+          console.log('无有效数据增量，跳过处理:', dataId);
+          return;
+        }
+        
+        // 标记数据已处理
+        processedDataIds.add(dataId);
+        lastProcessedTime = currentTime;
+        
+        console.log('✅ 处理新数据:', dataId, '得分+' + (data.scoreIncrease || 0), '时长+' + (data.timeIncrease || 0) + '秒');
+        
+        // 确定是否显示通知 - 对于有效的新数据，总是显示通知
+        const shouldShowNotification = !skipNotification || (data.scoreIncrease && data.scoreIncrease > 0);
+        
+        // 清理过期的数据ID（保留最近50个，减少内存占用）
+        if (processedDataIds.size > 50) {
+          const idsArray = Array.from(processedDataIds);
+          const keepIds = idsArray.slice(-50);
+          processedDataIds.clear();
+          keepIds.forEach(id => processedDataIds.add(id));
+        }
+
+        // 确定游戏类型 - 使用新的游戏类型映射
+        const gameType = data.gameType || 'coordination'; // 默认为手眼协调训练
+
+        // 累加本周得分 - 只有当得分增加大于0时才加分
+        if (data.scoreIncrease && data.scoreIncrease > 0) {
+          report.overview.thisWeekScore += data.scoreIncrease;
+          
+          // 将得分加到对应的游戏中
+          if (gameType === 'reaction') {
+            report.gameDetails.fruit.score += data.scoreIncrease;
+          } else if (gameType === 'cognitive') {
+            report.gameDetails.number.score += data.scoreIncrease;
+          } else if (gameType === 'coordination') {
+            report.gameDetails.hand.score += data.scoreIncrease;
+          }
+        }
+
+        // 累加总训练时长（转换为小时分钟秒格式） - 只要有时长增加就更新
+        if (data.timeIncrease && data.timeIncrease > 0) {
+          const currentDuration = parseTimeString(report.overview.totalDuration);
+          const newTotalSeconds = currentDuration.totalSeconds + data.timeIncrease;
+          report.overview.totalDuration = formatTimeFromSeconds(newTotalSeconds);
+          
+          // 将时长加到对应的游戏中
+          if (gameType === 'reaction') {
+            const fruitDuration = parseTimeString(report.gameDetails.fruit.duration);
+            report.gameDetails.fruit.duration = formatTimeFromSeconds(
+              fruitDuration.totalSeconds + data.timeIncrease
+            );
+          } else if (gameType === 'cognitive') {
+            const numberDuration = parseTimeString(report.gameDetails.number.duration);
+            report.gameDetails.number.duration = formatTimeFromSeconds(
+              numberDuration.totalSeconds + data.timeIncrease
+            );
+          } else if (gameType === 'coordination') {
+            const handDuration = parseTimeString(report.gameDetails.hand.duration);
+            report.gameDetails.hand.duration = formatTimeFromSeconds(
+              handDuration.totalSeconds + data.timeIncrease
+            );
+          }
+        }
+
+        // 如果当前显示的是李阿姨的信息，立即更新显示
+        if (currentPatientId === 102) {
+          document.getElementById("week-score").textContent =
+            report.overview.thisWeekScore;
+          document.getElementById("total-duration").textContent =
+            report.overview.totalDuration;
+          
+          // 更新游戏详细数据显示
+          updateGameDetails(report.gameDetails);
+          
+          // 刷新进度图表（包含能力阶段）
+          updateProgressChart(report.overview.scoreTrend);
+        }
+
+        // 显示更新通知（对于新的有效数据，总是显示通知）
+        if (shouldShowNotification) {
+          const gameTypeName = getGameTypeName(data.gameType);
+          const scoreText = `得分+${data.scoreIncrease}分`;
+          const timeText = `训练时长+${data.timeIncrease || 0}秒`;
+          const sourceText = data.source ? ` (${data.source === 'network_sse' ? '网络' : data.source === 'local' ? '本地' : data.source})` : '';
+          
+          const notification = {
+            type: "info",
+            patientId: 102,
+            patientName: "李阿姨",
+            message: `李阿姨正在进行${gameTypeName}${scoreText}, ${timeText}${sourceText}`,
+            timestamp: new Date().toLocaleTimeString(),
+          };
+          addNotification(notification);
+          console.log('📢 显示通知:', notification.message);
+        }
+
+        // 保存数据到持久化存储
+        savePatientDataToPersistence();
+
+        console.log("李阿姨数据已更新:", report.overview);
+      }
+      
+      // 获取游戏类型的中文名称
+      function getGameTypeName(gameType) {
+        const gameNames = {
+          'coordination': '手眼协调训练', // 打砖块游戏
+          'reaction': '反应速度训练',     // 水果忍者游戏
+          'cognitive': '认知能力训练'     // 数字认知游戏
+        };
+        return gameNames[gameType] ? gameNames[gameType] + ' ' : '';
+      }
+
+
+
+      // 解析时间字符串（如"96小时18分25秒"）
+      function parseTimeString(timeStr) {
+        const hourMatch = timeStr.match(/(\d+)小时/);
+        const minMatch = timeStr.match(/(\d+)分/);
+        const secMatch = timeStr.match(/(\d+)秒/);
+
+        const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
+        const minutes = minMatch ? parseInt(minMatch[1]) : 0;
+        const seconds = secMatch ? parseInt(secMatch[1]) : 0;
+
+        return {
+          hours: hours,
+          minutes: minutes,
+          seconds: seconds,
+          totalSeconds: hours * 3600 + minutes * 60 + seconds,
+        };
+      }
+
+      // 将秒数格式化为"小时分钟秒"格式
+      function formatTimeFromSeconds(totalSeconds) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        return `${hours}小时${minutes}分${seconds}秒`;
+      }
+
+      // 加载患者列表
+      function loadPatientList() {
+        const patientListElement = document.getElementById("patient-list");
+        const countElement = document.getElementById("patient-count");
+
+        setTimeout(() => {
+          patientListElement.innerHTML = "";
+
+          mockPatients.forEach((patient) => {
+            const patientItem = createPatientListItem(patient);
+            patientListElement.appendChild(patientItem);
+          });
+
+          countElement.textContent = `${mockPatients.length} 位患者`;
+        }, 300);
+      }
+
+      // 创建患者列表项
+      function createPatientListItem(patient) {
+        const div = document.createElement("div");
+        div.className =
+          "patient-item p-4 rounded-xl cursor-pointer transition-all duration-300";
+        div.onclick = () => selectPatient(patient.id);
+
+        div.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <div class="status-indicator status-${
+                      patient.status
+                    }"></div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-apple-gray-3 to-apple-gray-4 rounded-xl flex items-center justify-center">
+                        <i data-lucide="user" class="text-white w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900 tracking-tight">${
+                          patient.name
+                        }</h3>
+                        <p class="text-sm text-apple-gray-6">${
+                          patient.age
+                        }岁</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs px-2 py-1 rounded-lg font-medium ${
+                          patient.status === "training"
+                            ? "bg-apple-green/10 text-apple-green"
+                            : "bg-apple-gray-2 text-apple-gray-6"
+                        }">
+                            ${patient.status === "training" ? "训练中" : "空闲"}
+                        </span>
+                    </div>
+                </div>
+            `;
+
+        return div;
+      }
+
+      // 选择患者
+      function selectPatient(patientId) {
+        document.querySelectorAll(".patient-item").forEach((item) => {
+          item.classList.remove("active");
+        });
+        event.currentTarget.classList.add("active");
+
+        currentPatientId = patientId;
+        loadPatientDetail(patientId);
+      }
+
+      // 加载患者详情
+      function loadPatientDetail(patientId) {
+        const report = mockPatientReports[patientId];
+        if (!report) return;
+
+        document.getElementById("default-view").classList.add("hidden");
+        const detailElement = document.getElementById("patient-detail");
+        detailElement.classList.remove("hidden");
+
+        // 更新患者基本信息
+        document.getElementById("patient-name").textContent =
+          report.patientInfo.name;
+        document.getElementById(
+          "patient-age"
+        ).textContent = `${report.patientInfo.age}岁`;
+        document.getElementById("patient-stage").textContent =
+          report.patientInfo.stage;
+        document.getElementById("patient-diagnosis").textContent =
+          report.patientInfo.diagnosis;
+
+        // 更新KPI卡片
+        document.getElementById("total-duration").textContent =
+          report.overview.totalDuration;
+        document.getElementById("avg-accuracy").textContent =
+          report.overview.avgAccuracy;
+        document.getElementById("week-score").textContent =
+          report.overview.thisWeekScore;
+        document.getElementById("progress-rate").textContent = `${Math.round(
+          (report.overview.scoreTrend[report.overview.scoreTrend.length - 1] /
+            100) *
+            100
+        )}%`;
+
+        // 更新游戏详细数据
+        updateGameDetails(report.gameDetails);
+
+        // 更新康复计划
+        document.getElementById("current-plan").textContent =
+          report.currentPlan;
+
+        // 更新图表
+        updateProgressChart(report.overview.scoreTrend);
+
+        // 更新训练日志
+        updateTrainingLogs(report.trainingLogs);
+
+        // 更新风险分析
+        updateRiskAnalysis(report.riskAnalysis);
+
+        // 重新初始化图标
+        lucide.createIcons();
+      }
+
+      // 更新进度图表（包含能力阶段柱状图）
+      function updateProgressChart(data) {
+        const ctx = document.getElementById("progress-chart").getContext("2d");
+
+        if (progressChart) {
+          progressChart.destroy();
+        }
+
+        const labels = data.map((_, index) => `第${index + 1}天`);
+        
+        // 获取当前患者的最新得分
+        const currentScore = data[data.length - 1];
+        
+        // 准备能力阶段数据
+        const capabilityLabels = capabilityThresholds.map(t => t.capability);
+        const capabilityData = capabilityThresholds.map(t => {
+          // 如果患者得分达到该阈值，则显示该能力的完整高度，否则显示较低的高度
+          return currentScore >= t.threshold ? t.threshold : t.threshold * 0.3;
+        });
+        const capabilityColors = capabilityThresholds.map(t => 
+          currentScore >= t.threshold ? t.color : t.color.replace('0.8', '0.3')
+        );
+
+        progressChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "康复得分",
+                data: data,
+                borderColor: "#007AFF",
+                backgroundColor: "rgba(0, 122, 255, 0.1)",
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: "#007AFF",
+                pointBorderColor: "#ffffff",
+                pointBorderWidth: 3,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                yAxisID: 'y',
+              },
+              {
+                type: 'bar',
+                label: "功能能力阶段",
+                data: capabilityData,
+                backgroundColor: capabilityColors,
+                borderColor: capabilityColors.map(color => color.replace('0.8', '1')),
+                borderWidth: 1,
+                barThickness: 15,
+                categoryPercentage: 0.5,
+                yAxisID: 'y1',
+              }
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                  color: "#8E8E93",
+                  font: {
+                    family: "Inter",
+                    size: 12,
+                  },
+                  usePointStyle: true,
+                  filter: function(item, chart) {
+                    return item.datasetIndex === 0; // 只显示折线图的图例
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  title: function(context) {
+                    if (context[0].datasetIndex === 0) {
+                      return context[0].label;
+                    } else {
+                      return '功能能力阶段';
+                    }
+                  },
+                  label: function(context) {
+                    if (context.datasetIndex === 0) {
+                      return `康复得分: ${context.parsed.y}分`;
+                    } else {
+                      const capability = capabilityThresholds[context.dataIndex];
+                      const achieved = currentScore >= capability.threshold;
+                      return `${capability.capability}: ${achieved ? '已达成' : '未达成'} (需要${capability.threshold}分)`;
+                    }
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                  borderDash: [5, 5],
+                },
+                ticks: {
+                  color: "#8E8E93",
+                  font: {
+                    family: "Inter",
+                    size: 12,
+                  },
+                },
+                title: {
+                  display: true,
+                  text: '康复得分',
+                  color: "#007AFF",
+                  font: {
+                    family: "Inter",
+                    size: 13,
+                    weight: 'bold'
+                  }
+                }
+              },
+              y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                  drawOnChartArea: false,
+                },
+                ticks: {
+                  color: "#8E8E93",
+                  font: {
+                    family: "Inter",
+                    size: 12,
+                  },
+                  callback: function(value) {
+                    const threshold = capabilityThresholds.find(t => t.threshold === value);
+                    return threshold ? threshold.capability : '';
+                  }
+                },
+                title: {
+                  display: true,
+                  text: '功能能力',
+                  color: "#34C759",
+                  font: {
+                    family: "Inter",
+                    size: 13,
+                    weight: 'bold'
+                  }
+                }
+              },
+              x: {
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                  borderDash: [5, 5],
+                },
+                ticks: {
+                  color: "#8E8E93",
+                  font: {
+                    family: "Inter",
+                    size: 12,
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+
+
+      // 更新训练日志
+      function updateTrainingLogs(logs) {
+        const container = document.getElementById("training-logs");
+        container.innerHTML = "";
+
+        logs.forEach((log) => {
+          const logItem = document.createElement("div");
+          logItem.className =
+            "bg-apple-gray-1/50 rounded-xl p-4 hover:bg-apple-gray-1 transition-colors duration-200";
+          logItem.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold text-gray-900">${log.game}</h4>
+                        <span class="text-xs px-2 py-1 rounded-lg font-medium ${getScoreBadgeClass(
+                          log.score
+                        )}">
+                            ${log.score}分
+                        </span>
+                    </div>
+                    <div class="flex justify-between text-sm text-apple-gray-6">
+                        <span>${log.date}</span>
+                        <span>完成率: ${log.completion}</span>
+                        <span>时长: ${log.duration}</span>
+                    </div>
+                `;
+          container.appendChild(logItem);
+        });
+      }
+
+      // 获取得分徽章样式
+      function getScoreBadgeClass(score) {
+        if (score >= 90) return "bg-apple-green/10 text-apple-green";
+        if (score >= 70) return "bg-apple-orange/10 text-apple-orange";
+        return "bg-apple-red/10 text-apple-red";
+      }
+
+      // 更新风险分析
+      function updateRiskAnalysis(risks) {
+        const container = document.getElementById("risk-analysis");
+        container.innerHTML = "";
+
+        if (risks.length === 0) {
+          container.innerHTML =
+            '<p class="text-apple-gray-6 text-center py-8">暂无风险提示</p>';
+          return;
+        }
+
+        risks.forEach((risk) => {
+          const riskItem = document.createElement("div");
+          riskItem.className = `p-4 rounded-xl border-l-4 ${getRiskBorderClass(
+            risk.count
+          )} transition-all duration-200 hover:shadow-sm`;
+          riskItem.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-gray-900">${risk.action}</p>
+                            <p class="text-sm text-apple-gray-6 mt-1">${risk.error}</p>
+                        </div>
+                        <span class="bg-apple-gray-2 text-apple-gray-6 text-xs font-medium px-3 py-1 rounded-full">
+                            ${risk.count}次
+                        </span>
+                    </div>
+                `;
+          container.appendChild(riskItem);
+        });
+      }
+
+      // 获取风险边框样式
+      function getRiskBorderClass(count) {
+        if (count >= 10) return "border-apple-red bg-apple-red/5";
+        if (count >= 5) return "border-apple-orange bg-apple-orange/5";
+        return "border-apple-blue bg-apple-blue/5";
+      }
+
+      // 初始化WebSocket连接
+      function initWebSocket() {
+        const wsStatus = document.getElementById("ws-status");
+
+        setTimeout(() => {
+          wsStatus.className = "status-indicator status-training";
+          simulateRealtimeMessages();
+        }, 1000);
+      }
+
+      // 模拟实时消息
+      function simulateRealtimeMessages() {
+        const messages = [
+          {
+            type: "alert",
+            patientId: 102,
+            patientName: "李阿姨",
+            message: "连续3次'手腕旋转'动作错误",
+            timestamp: new Date().toLocaleTimeString(),
+          },
+        ];
+
+        let messageIndex = 0;
+        setInterval(() => {
+          if (messageIndex < messages.length) {
+            handleWebSocketMessage(messages[messageIndex]);
+            messageIndex++;
+          } else {
+            if (Math.random() < 0.2) {
+              const randomPatient =
+                mockPatients[Math.floor(Math.random() * mockPatients.length)];
+              const alertMessage = {
+                type: "alert",
+                patientId: randomPatient.id,
+                patientName: randomPatient.name,
+                message: "训练中检测到异常动作",
+                timestamp: new Date().toLocaleTimeString(),
+              };
+              handleWebSocketMessage(alertMessage);
+            }
+          }
+        }, 15000);
+      }
+
+      // 处理WebSocket消息
+      function handleWebSocketMessage(data) {
+        if (data.type === "alert") {
+          addNotification(data);
+        } else if (data.type === "status_update") {
+          updatePatientStatus(data.patientId, data.newStatus);
+        }
+      }
+
+      // 添加通知
+      function addNotification(alert) {
+        const notificationsContainer = document.getElementById("notifications");
+
+        if (notificationsContainer.querySelector(".text-center")) {
+          notificationsContainer.innerHTML = "";
+        }
+
+        // 根据通知类型选择图标和颜色
+        let iconClass, colorClass, iconName;
+        if (alert.type === "info") {
+          iconClass = "bg-apple-blue/10";
+          colorClass = "text-apple-blue";
+          iconName = "info";
+        } else {
+          iconClass = "bg-apple-orange/10";
+          colorClass = "text-apple-orange";
+          iconName = "alert-triangle";
+        }
+
+        const notification = document.createElement("div");
+        notification.className = "notification-card rounded-xl p-4 shadow-sm";
+        notification.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 ${iconClass} rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="${iconName}" class="${colorClass} w-4 h-4"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold text-gray-900 text-sm">${alert.patientName}</p>
+                        <p class="text-sm text-gray-600 mt-1 leading-relaxed">${alert.message}</p>
+                        <p class="text-xs text-apple-gray-6 mt-2">${alert.timestamp}</p>
+                    </div>
+                </div>
+            `;
+
+        notificationsContainer.insertBefore(
+          notification,
+          notificationsContainer.firstChild
+        );
+
+        // 重新初始化图标
+        lucide.createIcons();
+
+        const notifications =
+          notificationsContainer.querySelectorAll(".notification-card");
+        if (notifications.length > 8) {
+          notificationsContainer.removeChild(
+            notifications[notifications.length - 1]
+          );
+        }
+      }
+
+      // 更新患者状态
+      function updatePatientStatus(patientId, newStatus) {
+        const patientItems = document.querySelectorAll(".patient-item");
+        patientItems.forEach((item) => {
+          const indicator = item.querySelector(".status-indicator");
+          if (indicator) {
+            indicator.className = `status-indicator status-${newStatus}`;
+          }
+        });
+      }
+
+      // 更新游戏详细数据
+      function updateGameDetails(gameDetails) {
+        document.getElementById("fruit-duration").textContent =
+          gameDetails.fruit.duration;
+        document.getElementById("number-duration").textContent =
+          gameDetails.number.duration;
+        document.getElementById("hand-duration").textContent =
+          gameDetails.hand.duration;
+        document.getElementById("fruit-score").textContent =
+          gameDetails.fruit.score;
+        document.getElementById("number-score").textContent =
+          gameDetails.number.score;
+        document.getElementById("hand-score").textContent =
+          gameDetails.hand.score;
+      }
+
+      // 初始化可调整大小的侧边栏功能
+      function initResizableSidebars() {
+        // 从localStorage加载保存的设置
+        loadSidebarSettings();
+
+        // 初始化患者侧边栏
+        initSidebarResize("patient-sidebar", "patient-resize-handle", "left");
+        initSidebarCollapse(
+          "patient-sidebar",
+          "patient-collapse-btn",
+          "chevron-left",
+          "chevron-right"
+        );
+
+        // 初始化通知侧边栏
+        initSidebarResize(
+          "notification-sidebar",
+          "notification-resize-handle",
+          "right"
+        );
+        initSidebarCollapse(
+          "notification-sidebar",
+          "notification-collapse-btn",
+          "chevron-right",
+          "chevron-left"
+        );
+      }
+
+      // 初始化侧边栏拖拽调整大小功能
+      function initSidebarResize(sidebarId, handleId, side) {
+        const sidebar = document.getElementById(sidebarId);
+        const handle = document.getElementById(handleId);
+        let isResizing = false;
+        let startX = 0;
+        let startWidth = 0;
+
+        handle.addEventListener("mousedown", (e) => {
+          isResizing = true;
+          startX = e.clientX;
+          startWidth = parseInt(
+            document.defaultView.getComputedStyle(sidebar).width,
+            10
+          );
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+          handle.classList.add("active");
+        });
+
+        document.addEventListener("mousemove", (e) => {
+          if (!isResizing) return;
+
+          let newWidth;
+          if (side === "left") {
+            newWidth = startWidth + (e.clientX - startX);
+          } else {
+            newWidth = startWidth - (e.clientX - startX);
+          }
+
+          // 限制最小和最大宽度
+          newWidth = Math.max(60, Math.min(500, newWidth));
+          sidebar.style.width = newWidth + "px";
+        });
+
+        document.addEventListener("mouseup", () => {
+          if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = "";
+            document.body.style.userSelect = "";
+            handle.classList.remove("active");
+            saveSidebarSettings();
+          }
+        });
+      }
+
+      // 初始化侧边栏折叠功能
+      function initSidebarCollapse(
+        sidebarId,
+        buttonId,
+        expandIcon,
+        collapseIcon
+      ) {
+        const sidebar = document.getElementById(sidebarId);
+        const button = document.getElementById(buttonId);
+        const icon = button.querySelector("i");
+
+        button.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const isCollapsed = sidebar.classList.contains("collapsed");
+
+          if (isCollapsed) {
+            // 展开
+            sidebar.classList.remove("collapsed");
+            icon.setAttribute("data-lucide", expandIcon);
+          } else {
+            // 收起
+            sidebar.classList.add("collapsed");
+            icon.setAttribute("data-lucide", collapseIcon);
+          }
+
+          // 重新初始化图标
+          setTimeout(() => {
+            lucide.createIcons();
+          }, 100);
+
+          // 保存设置
+          saveSidebarSettings();
+        });
+
+        // 添加额外的点击区域
+        const collapsedIndicator = sidebar.querySelector(
+          ".collapsed-indicator"
+        );
+        const expandHint = sidebar.querySelector(".expand-hint");
+
+        // 点击折叠指示器展开
+        if (collapsedIndicator) {
+          collapsedIndicator.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (sidebar.classList.contains("collapsed")) {
+              button.click();
+            }
+          });
+        }
+
+        // 点击展开提示展开
+        if (expandHint) {
+          expandHint.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (sidebar.classList.contains("collapsed")) {
+              button.click();
+            }
+          });
+        }
+
+        // 点击侧边栏空白区域也可以展开
+        sidebar.addEventListener("click", (e) => {
+          if (
+            sidebar.classList.contains("collapsed") &&
+            e.target !== button &&
+            !button.contains(e.target) &&
+            e.target !== collapsedIndicator &&
+            e.target !== expandHint
+          ) {
+            const rect = sidebar.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            // 如果点击在侧边栏区域，触发展开
+            if (clickX > 5 && clickX < 55 && clickY > 20) {
+              button.click();
+            }
+          }
+        });
+      }
+
+      // 保存侧边栏设置到localStorage
+      function saveSidebarSettings() {
+        const patientSidebar = document.getElementById("patient-sidebar");
+        const notificationSidebar = document.getElementById(
+          "notification-sidebar"
+        );
+
+        const settings = {
+          patientWidth: patientSidebar.style.width || "320px",
+          patientCollapsed: patientSidebar.classList.contains("collapsed"),
+          notificationWidth: notificationSidebar.style.width || "320px",
+          notificationCollapsed:
+            notificationSidebar.classList.contains("collapsed"),
+        };
+
+        localStorage.setItem("sidebar-settings", JSON.stringify(settings));
+      }
+
+      // 从localStorage加载侧边栏设置
+      function loadSidebarSettings() {
+        try {
+          const settings = JSON.parse(
+            localStorage.getItem("sidebar-settings") || "{}"
+          );
+          const patientSidebar = document.getElementById("patient-sidebar");
+          const notificationSidebar = document.getElementById(
+            "notification-sidebar"
+          );
+
+          // 恢复宽度
+          if (settings.patientWidth) {
+            patientSidebar.style.width = settings.patientWidth;
+          }
+          if (settings.notificationWidth) {
+            notificationSidebar.style.width = settings.notificationWidth;
+          }
+
+          // 恢复折叠状态
+          if (settings.patientCollapsed) {
+            patientSidebar.classList.add("collapsed");
+            const patientIcon = document.querySelector(
+              "#patient-collapse-btn i"
+            );
+            patientIcon.setAttribute("data-lucide", "chevron-right");
+          }
+          if (settings.notificationCollapsed) {
+            notificationSidebar.classList.add("collapsed");
+            const notificationIcon = document.querySelector(
+              "#notification-collapse-btn i"
+            );
+            notificationIcon.setAttribute("data-lucide", "chevron-left");
+          }
+
+          // 重新初始化图标
+          setTimeout(() => lucide.createIcons(), 100);
+        } catch (error) {
+          console.error("加载侧边栏设置失败:", error);
+        }
+      }
+
+      // 切换抽屉的显示状态
+      function toggleDrawer(drawerId) {
+        const drawer = document.getElementById(drawerId);
+        const toggle = document.querySelector(`[onclick="toggleDrawer('${drawerId}')"]`);
+        const icon = toggle.querySelector('i');
+        
+        drawer.classList.toggle('open');
+        toggle.classList.toggle('open');
+        
+        if (drawer.classList.contains('open')) {
+          icon.setAttribute('data-lucide', 'chevron-up');
+        } else {
+          icon.setAttribute('data-lucide', 'chevron-down');
+        }
+        
+        // 重新初始化图标
+        lucide.createIcons();
+      }
+
+      // ================== 网络传输功能 ==================
+      
+      // 初始化网络连接
+      // 自动检测服务器地址
+      async function autoDetectServerUrl() {
+        console.log('🔍 开始自动检测服务器地址...');
+        
+        // 首先尝试当前页面的host（如果用户是通过服务器访问的）
+        const currentHost = window.location.host;
+        if (currentHost && currentHost !== 'localhost' && !currentHost.startsWith('127.0.0.1')) {
+          const currentUrl = `${window.location.protocol}//${currentHost}`;
+          console.log(`🎯 尝试当前host: ${currentUrl}`);
+          if (await testServerConnection(currentUrl)) {
+            return currentUrl;
+          }
+        }
+        
+        // 获取本机可能的IP段进行测试
+        const commonPorts = [3443, 3000];
+        const ipRanges = [
+          // 常见的局域网IP段
+          '192.168.1', '192.168.0', '192.168.2', '192.168.3', '192.168.4', '192.168.5',
+          '10.0.0', '10.0.1', '172.16.0', '172.16.1'
+        ];
+        
+        for (const port of commonPorts) {
+          const protocol = port === 3443 ? 'https' : 'http';
+          
+          for (const ipRange of ipRanges) {
+            // 测试网关地址和常见服务器地址
+            const testIPs = [1, 100, 101, 102, 110, 119, 120, 150, 200];
+            
+            for (const ip of testIPs) {
+              const testUrl = `${protocol}://${ipRange}.${ip}:${port}`;
+              if (await testServerConnection(testUrl)) {
+                return testUrl;
+              }
+            }
+          }
+        }
+        
+        console.log('❌ 未找到可用的服务器');
+        return null;
+      }
+      
+      // 测试服务器连接（改进版）
+      async function testServerConnection(url) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超时
+          
+          const response = await fetch(`${url}/status?t=${Date.now()}`, {
+            method: 'GET',
+            signal: controller.signal,
+            cache: 'no-cache',
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ 找到服务器: ${url}`, data);
+            return true;
+          }
+        } catch (error) {
+          // 静默忽略错误，继续尝试下一个
+          if (error.name !== 'AbortError') {
+            console.debug(`测试连接失败 ${url}: ${error.message}`);
+          }
+        }
+        return false;
+      }
+      
+      async function initNetworkConnection() {
+        // 从localStorage加载网络配置
+        const savedConfig = localStorage.getItem('networkConfig');
+        if (savedConfig) {
+          const config = JSON.parse(savedConfig);
+          networkConfig = { ...networkConfig, ...config };
+        }
+        
+        // 自动检测服务器地址（首次启动或没有有效配置时）
+        if (networkConfig.autoDetection && (!networkConfig.serverUrl || !(await testServerConnection(networkConfig.serverUrl)))) {
+          document.getElementById('server-url-input').placeholder = '正在自动检测服务器...';
+          updateNetworkStatus('检测中...', 'training');
+          
+          const detectedUrl = await autoDetectServerUrl();
+          if (detectedUrl) {
+            networkConfig.serverUrl = detectedUrl;
+            document.getElementById('server-url-input').value = detectedUrl;
+            document.getElementById('server-url-input').placeholder = '已自动检测到服务器';
+            
+            // 保存检测到的配置
+            localStorage.setItem('networkConfig', JSON.stringify(networkConfig));
+            
+            // 自动连接
+            console.log('🚀 自动连接到检测到的服务器...');
+            setTimeout(() => {
+              connectToNetwork();
+            }, 500);
+          } else {
+            document.getElementById('server-url-input').placeholder = '未检测到服务器，请手动输入';
+            document.getElementById('server-url-input').removeAttribute('readonly');
+            updateNetworkStatus('未连接', 'idle');
+          }
+        } else {
+          // 使用已保存的配置
+          document.getElementById('server-url-input').value = networkConfig.serverUrl || '';
+          
+          // 尝试自动连接到上次的服务器
+          if (networkConfig.serverUrl) {
+            setTimeout(() => {
+              connectToNetwork();
+            }, 1000);
+          } else {
+            updateNetworkStatus('未连接', 'idle');
+          }
+        }
+        
+        document.getElementById('auto-sync-toggle').checked = networkConfig.autoSync;
+      }
+      
+      // 重新检测服务器（改进版）
+      async function reDetectServer() {
+        try {
+          console.log('🔄 用户触发重新检测...');
+          
+          // 先清理现有连接
+          cleanupConnection();
+          
+          // 重置配置
+          networkConfig.serverUrl = '';
+          networkConfig.autoDetection = true;
+          
+          // 清空输入框
+          const inputElement = document.getElementById('server-url-input');
+          if (inputElement) {
+            inputElement.value = '';
+            inputElement.placeholder = '正在重新检测服务器...';
+            inputElement.setAttribute('readonly', true);
+          }
+          
+          updateNetworkStatus('重新检测中...', 'training');
+          
+          // 清除浏览器缓存相关的存储
+          try {
+            localStorage.removeItem('networkConfig');
+            sessionStorage.clear();
+          } catch (e) {
+            console.warn('清除缓存时出现问题:', e);
+          }
+          
+          const detectedUrl = await autoDetectServerUrl();
+          if (detectedUrl) {
+            networkConfig.serverUrl = detectedUrl;
+            
+            if (inputElement) {
+              inputElement.value = detectedUrl;
+              inputElement.placeholder = '已检测到服务器';
+            }
+            
+            // 保存新配置
+            localStorage.setItem('networkConfig', JSON.stringify(networkConfig));
+            
+            // 自动连接
+            console.log('🚀 自动连接到新检测的服务器...');
+            setTimeout(() => {
+              connectToNetwork();
+            }, 1000);
+          } else {
+            if (inputElement) {
+              inputElement.placeholder = '未检测到服务器，请检查网络';
+              inputElement.removeAttribute('readonly');
+            }
+            updateNetworkStatus('检测失败', 'idle');
+            alert('未检测到可用服务器\n\n请检查：\n1. 服务器是否已启动\n2. 网络连接是否正常\n3. 防火墙设置是否阻止连接');
+          }
+        } catch (error) {
+          console.error('❌ 重新检测过程出错:', error);
+          updateNetworkStatus('检测异常', 'idle');
+          alert(`重新检测失败: ${error.message}`);
+        }
+      }
+      
+      // 切换网络设置面板
+      function toggleNetworkSettings() {
+        const panel = document.getElementById('network-settings-panel');
+        const isHidden = panel.classList.contains('hidden');
+        
+        if (isHidden) {
+          panel.classList.remove('hidden');
+          document.getElementById('server-url-input').focus();
+        } else {
+          panel.classList.add('hidden');
+        }
+        
+        // 重新初始化图标
+        setTimeout(() => lucide.createIcons(), 100);
+      }
+      
+      // 测试网络连接
+      async function testNetworkConnection() {
+        const serverUrl = document.getElementById('server-url-input').value.trim();
+        if (!serverUrl) {
+          alert('请输入服务器地址');
+          return;
+        }
+        
+        const statusInfo = document.getElementById('network-status-info');
+        const indicator = document.getElementById('connection-indicator');
+        const statusText = document.getElementById('connection-status-text');
+        
+        statusInfo.classList.remove('hidden');
+        indicator.className = 'status-indicator status-training';
+        statusText.textContent = '正在测试连接...';
+        
+        try {
+          const response = await fetch(`${serverUrl}/status`, {
+            method: 'GET',
+            timeout: 5000
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            indicator.className = 'status-indicator status-training';
+            statusText.textContent = `连接成功！服务器时间: ${data.serverTime}`;
+            
+            setTimeout(() => {
+              statusInfo.classList.add('hidden');
+            }, 3000);
+          } else {
+            throw new Error('服务器响应错误');
+          }
+        } catch (error) {
+          console.error('网络测试失败:', error);
+          indicator.className = 'status-indicator status-idle';
+          statusText.textContent = '连接失败，请检查服务器地址和网络';
+          
+          setTimeout(() => {
+            statusInfo.classList.add('hidden');
+          }, 3000);
+        }
+      }
+      
+      // 浏览器兼容性检查
+      function checkBrowserCompatibility() {
+        const userAgent = navigator.userAgent;
+        const isEdge = userAgent.includes('Edg/');
+        const isChrome = userAgent.includes('Chrome/');
+        const isFirefox = userAgent.includes('Firefox/');
+        
+        console.log(`🌐 浏览器信息: ${userAgent}`);
+        console.log(`📱 浏览器类型: ${isEdge ? 'Edge' : isChrome ? 'Chrome' : isFirefox ? 'Firefox' : '其他'}`);
+        
+        // 检查EventSource支持
+        if (typeof EventSource === 'undefined') {
+          console.error('❌ 浏览器不支持EventSource');
+          return false;
+        }
+        
+        return true;
+      }
+      
+      // 清理旧连接和事件
+      function cleanupConnection() {
+        try {
+          if (networkConfig.eventSource) {
+            console.log('🧹 清理现有EventSource连接...');
+            networkConfig.eventSource.close();
+            networkConfig.eventSource = null;
+          }
+          networkConfig.connected = false;
+          
+          // 强制垃圾回收（如果支持）
+          if (window.gc) {
+            window.gc();
+          }
+        } catch (error) {
+          console.warn('清理连接时出现问题:', error);
+        }
+      }
+      
+      // 连接到网络服务器（改进版）
+      function connectToNetwork() {
+        try {
+          console.log('🔗 开始建立网络连接...');
+          
+          // 检查浏览器兼容性
+          if (!checkBrowserCompatibility()) {
+            updateNetworkStatus('浏览器不兼容', 'idle');
+            alert('您的浏览器不支持实时数据功能，请使用Chrome、Edge或Firefox最新版本');
+            return;
+          }
+          
+          let serverUrl = document.getElementById('server-url-input').value.trim();
+          const autoSync = document.getElementById('auto-sync-toggle').checked;
+          
+          // 如果没有服务器地址，使用配置中的地址
+          if (!serverUrl && networkConfig.serverUrl) {
+            serverUrl = networkConfig.serverUrl;
+            document.getElementById('server-url-input').value = serverUrl;
+          }
+          
+          console.log('🌐 服务器地址:', serverUrl);
+          console.log('🔄 自动同步:', autoSync);
+          
+          if (!serverUrl) {
+            console.error('❌ 没有可用的服务器地址');
+            updateNetworkStatus('配置错误', 'idle');
+            alert('请先设置服务器地址');
+            return;
+          }
+          
+          // 更新配置
+          networkConfig.serverUrl = serverUrl;
+          networkConfig.autoSync = autoSync;
+          
+          // 保存配置到localStorage
+          localStorage.setItem('networkConfig', JSON.stringify(networkConfig));
+          
+          // 清理旧连接
+          cleanupConnection();
+          
+          // 先测试服务器连通性
+          updateNetworkStatus('测试连接...', 'training');
+          
+          fetch(`${serverUrl}/status`, {
+            method: 'GET',
+            cache: 'no-cache',
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`服务器响应错误: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('✅ 服务器连通性测试成功:', data);
+            // 服务器可达，开始建立EventSource连接
+            establishEventSourceConnection(serverUrl);
+          })
+          .catch(error => {
+            console.error('❌ 服务器连通性测试失败:', error);
+            updateNetworkStatus('服务器不可达', 'idle');
+            alert(`无法连接到服务器: ${error.message}\n\n请检查：\n1. 服务器是否启动\n2. 网络地址是否正确\n3. 防火墙设置`);
+          });
+          
+        } catch (error) {
+          console.error('❌ 连接过程出现异常:', error);
+          updateNetworkStatus('连接异常', 'idle');
+          alert(`连接过程出现错误: ${error.message}`);
+        }
+      }
+      
+      // 建立EventSource连接
+      function establishEventSourceConnection(serverUrl) {
+        try {
+          updateNetworkStatus('建立实时连接...', 'training');
+          console.log(`🔄 建立EventSource连接: ${serverUrl}/stream`);
+          
+          // 添加随机参数防止缓存
+          const streamUrl = `${serverUrl}/stream?t=${Date.now()}&r=${Math.random()}`;
+          networkConfig.eventSource = new EventSource(streamUrl);
+          
+          // 设置连接超时
+          const connectionTimeout = setTimeout(() => {
+            console.error('❌ EventSource连接超时');
+            if (networkConfig.eventSource) {
+              networkConfig.eventSource.close();
+              networkConfig.eventSource = null;
+            }
+            updateNetworkStatus('连接超时', 'idle');
+            alert('连接超时，请重试或检查网络');
+          }, 15000); // 15秒超时
+          
+          networkConfig.eventSource.onopen = function(event) {
+            clearTimeout(connectionTimeout);
+            networkConfig.connected = true;
+            updateNetworkStatus('已连接', 'training');
+            console.log('✅ EventSource连接建立成功');
+            
+            // 显示连接成功通知
+            addNotification({
+              type: "info",
+              patientId: 0,
+              patientName: "系统",
+              message: "局域网连接建立成功，开始接收患者数据",
+              timestamp: new Date().toLocaleTimeString(),
+            });
+            
+            // 关闭设置面板
+            setTimeout(() => {
+              toggleNetworkSettings();
+            }, 1000);
+          };
+          
+          networkConfig.eventSource.onmessage = function(event) {
+            try {
+              const data = JSON.parse(event.data);
+              console.log('📨 收到EventSource数据:', data);
+              
+              // 忽略心跳包和初始化消息
+              if (data.type === 'heartbeat' || data.type === 'init') {
+                return;
+              }
+              
+              handleNetworkData(data);
+            } catch (error) {
+              console.error('解析网络数据失败:', error);
+            }
+          };
+          
+          networkConfig.eventSource.onerror = function(event) {
+            clearTimeout(connectionTimeout);
+            console.error('❌ EventSource连接错误');
+            console.error('EventSource状态:', networkConfig.eventSource?.readyState);
+            console.error('错误事件:', event);
+            
+            networkConfig.connected = false;
+            
+            // 根据readyState判断错误类型
+            if (networkConfig.eventSource) {
+              switch (networkConfig.eventSource.readyState) {
+                case EventSource.CONNECTING:
+                  updateNetworkStatus('连接中断', 'idle');
+                  break;
+                case EventSource.CLOSED:
+                  updateNetworkStatus('连接已关闭', 'idle');
+                  break;
+                default:
+                  updateNetworkStatus('连接错误', 'idle');
+              }
+            } else {
+              updateNetworkStatus('连接失败', 'idle');
+            }
+          };
+          
+        } catch (error) {
+          console.error('❌ 建立EventSource连接失败:', error);
+          updateNetworkStatus('连接失败', 'idle');
+          alert(`建立实时连接失败: ${error.message}`);
+        }
+      }
+      
+      // 断开网络连接
+      function disconnectFromNetwork() {
+        if (networkConfig.eventSource) {
+          networkConfig.eventSource.close();
+          networkConfig.eventSource = null;
+        }
+        
+        if (networkSyncTimer) {
+          clearInterval(networkSyncTimer);
+          networkSyncTimer = null;
+        }
+        
+        networkConfig.connected = false;
+        updateNetworkStatus('未连接', 'idle');
+        
+        // 重新初始化数据接收器，启用本地监听
+        initGameDataReceiver();
+        
+        console.log('网络已断开，恢复本地数据监听');
+      }
+      
+      // 启动网络同步（仅在SSE不可用时使用）
+      function startNetworkSync() {
+        // 如果已经有SSE连接，不启动轮询同步
+        if (networkConfig.eventSource && networkConfig.eventSource.readyState === EventSource.OPEN) {
+          console.log('已有SSE连接，跳过轮询同步');
+          return;
+        }
+        
+        if (networkSyncTimer) {
+          clearInterval(networkSyncTimer);
+        }
+        
+        networkSyncTimer = setInterval(async () => {
+          if (!networkConfig.connected) return;
+          
+          // 如果SSE连接已建立，停止轮询
+          if (networkConfig.eventSource && networkConfig.eventSource.readyState === EventSource.OPEN) {
+            clearInterval(networkSyncTimer);
+            networkSyncTimer = null;
+            console.log('SSE连接已建立，停止轮询同步');
+            return;
+          }
+          
+          try {
+            const response = await fetch(`${networkConfig.serverUrl}/get-game-data`);
+            if (response.ok) {
+              const result = await response.json();
+              if (result.success && result.data.length > 0) {
+                // 处理最新的游戏数据（允许通知，去重逻辑会处理重复数据）
+                const latestData = result.data[result.data.length - 1];
+                if (latestData) {
+                  latestData.source = 'network_poll';
+                  handleGameDataUpdate(latestData, false);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('轮询同步数据失败:', error);
+          }
+        }, networkConfig.syncInterval);
+        
+        console.log('轮询同步已启动，间隔:', networkConfig.syncInterval / 1000, '秒');
+      }
+      
+      // 处理网络接收的数据
+      function handleNetworkData(data) {
+        console.log('收到网络数据:', data);
+        
+        switch (data.type) {
+          case 'init':
+            console.log('网络初始化:', data.message);
+            break;
+            
+          case 'game_data':
+            // 处理游戏数据（允许通知，去重逻辑会处理重复数据）
+            if (data.data) {
+              data.data.source = 'network_sse';
+              handleGameDataUpdate(data.data, false);
+            }
+            break;
+            
+          case 'data_cleared':
+            console.log('服务器数据已清空');
+            addNotification({
+              type: "info",
+              patientId: 0,
+              patientName: "系统",
+              message: "服务器游戏数据已清空",
+              timestamp: new Date().toLocaleTimeString(),
+            });
+            break;
+            
+          default:
+            console.log('未知数据类型:', data.type);
+        }
+      }
+      
+      // 更新网络状态显示
+      function updateNetworkStatus(text, status) {
+        const statusElement = document.getElementById('network-status');
+        const textElement = document.getElementById('network-text');
+        
+        if (statusElement && textElement) {
+          statusElement.className = `status-indicator status-${status}`;
+          textElement.textContent = text;
+        }
+      }
+      
+      // 修改原有的游戏数据更新函数，支持网络传输
+      const originalHandleGameDataUpdate = handleGameDataUpdate;
+      handleGameDataUpdate = function(data, skipNotification = false) {
+        // 调用原有的处理逻辑
+        originalHandleGameDataUpdate(data, skipNotification);
+        
+        // 仅当数据来源是本地且网络已连接时，才同步到网络
+        if (networkConfig.connected && 
+            (!data.source || data.source === 'local') && 
+            data.source !== 'network_sse' && 
+            data.source !== 'network_poll') {
+          
+          // 标记数据来源，避免循环传输
+          const uploadData = { 
+            ...data, 
+            source: 'local',
+            timestamp: new Date().toISOString()
+          };
+          
+          // 异步发送到服务器
+          fetch(`${networkConfig.serverUrl}/upload-game-data`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(uploadData)
+          }).then(response => response.json())
+            .then(result => {
+              if (result.success) {
+                console.log('✅ 本地数据已同步到网络:', result.message);
+              }
+            })
+            .catch(error => {
+              console.error('❌ 网络同步失败:', error);
+            });
+        }
+      };
+
+
+    </script>
+  </body>
+</html>

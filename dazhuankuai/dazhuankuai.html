@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>手眼协调训练 - 慧心康复中心</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <meta property="og:title" content="Manual Brick Breaker" />
+    <meta
+      property="og:description"
+      content="Play brick breaker with your hands!"
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://manual-brick-breaker.netlify.app/"
+    />
+    <meta
+      property="og:image"
+      content="https://collidingscopes.github.io/manual-brick-breaker/assets/siteOGImage3.png"
+    />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1365" />
+    <meta property="og:image:height" content="1374" />
+
+    <link rel="icon" href="../assets/siteFavicon.png" />
+    <link rel="apple-touch-icon" href="../assets/siteFavicon.png" />
+
+    <!-- 苹果风格：San Francisco字体系列 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  </head>
+  <body>
+    <!-- 苹果风格：摄像头区域优化 -->
+    <div class="camera-container">
+      <video id="videoElement" playsinline></video>
+      <canvas id="handCanvas"></canvas>
+    </div>
+
+    <!-- 主题控制中心已完全移除 -->
+
+    <!-- 调整：页面采用Flex布局 -->
+    <div class="page-container">
+      <!-- 调整：游戏主要区域（左侧） -->
+      <div class="game-container-div">
+        <div class="game-container">
+          <canvas id="gameCanvas"></canvas>
+
+          <!-- 苹果风格：等级提升指示器 -->
+          <div id="levelUpIndicator" class="level-up-indicator">
+            <div class="level-up-content">
+              <p class="level-up-text">LEVEL UP!</p>
+              <p class="level-up-subtitle">速度 +10%, 板子宽度 -10%</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 苹果风格：控制按钮区域 -->
+        <div class="control-section">
+          <button
+            id="restartButton"
+            class="apple-button primary"
+            onclick="restartGame()"
+          >
+            <span>重新开始</span>
+          </button>
+          <div class="secondary-controls">
+            <a class="apple-link" href="#aboutText">游戏说明</a>
+            <!-- 已删除：支持开发链接 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 调整：将统计模块移出游戏框到右侧 -->
+      <div class="stats-sidebar">
+        <div class="stat-item">
+          <span class="stat-label">时间</span>
+          <span class="stat-value" id="timeElement">0s</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">等级</span>
+          <span class="stat-value level" id="levelElement">1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">得分</span>
+          <span class="stat-value score" id="scoreElement">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 苹果风格：开始游戏模态框 -->
+    <div id="startModal" class="apple-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>MANUAL BRICK BREAKER</h2>
+          <p class="modal-subtitle">用手势控制的打砖块游戏</p>
+        </div>
+        <div class="instruction-list">
+          <div class="instruction-item">
+            <span class="instruction-icon">✋</span>
+            <span class="instruction-text">左右移动手掌控制挡板</span>
+          </div>
+          <div class="instruction-item">
+            <span class="instruction-icon">🧱</span>
+            <span class="instruction-text">打破所有砖块进入下一关</span>
+          </div>
+          <div class="instruction-item">
+            <span class="instruction-icon">🎚️</span>
+            <span class="instruction-text">每关速度+10%，挡板宽度-10%</span>
+          </div>
+          <div class="instruction-item">
+            <span class="instruction-icon">👁️</span>
+            <span class="instruction-text">确保摄像头能清晰看到手掌</span>
+          </div>
+        </div>
+        <button class="apple-button primary large" onclick="console.log('按钮被点击'); try { startGame(); } catch(e) { console.error('startGame错误:', e); alert('游戏启动错误: ' + e.message); }">
+          开始游戏
+        </button>
+      </div>
+    </div>
+
+    <!-- 苹果风格：游戏结束模态框 -->
+    <div id="gameOverModal" class="apple-modal game-over-modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeGameOverModal()">×</button>
+        <div class="modal-header">
+          <h2>游戏结束</h2>
+          <p class="modal-subtitle">恭喜完成挑战！</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-row">
+            <span class="label">游戏时长</span>
+            <span class="value" id="finalTime">0s</span>
+          </div>
+          <div class="stat-row">
+            <span class="label">最终等级</span>
+            <span class="value level" id="finalLevel">1</span>
+          </div>
+          <div class="stat-row">
+            <span class="label">最终得分</span>
+            <span class="value score" id="finalScore">0</span>
+          </div>
+        </div>
+        <p class="loading-text hidden">正在加载排行榜...</p>
+        <button class="apple-button primary large" onclick="restartGame()">
+          再来一局
+        </button>
+      </div>
+    </div>
+
+    <!-- 苹果风格：信息区域（精简版） -->
+    <div id="notesDiv">
+      <div id="textBox">
+        <h2 id="aboutText">MANUAL BRICK BREAKER</h2>
+        <p>用手势控制的创新打砖块游戏，体验最自然的操作方式！</p>
+        <div class="feature-grid">
+          <!-- 保留：苹果设计和隐私保护卡片 -->
+          <div class="feature-item">
+            <span class="feature-icon">🎨</span>
+            <div class="feature-content">
+              <h3>苹果设计</h3>
+              <p>采用苹果设计语言，5种主题色可选</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🔒</span>
+            <div class="feature-content">
+              <h3>隐私保护</h3>
+              <p>所有处理在本地完成，不上传任何数据</p>
+            </div>
+          </div>
+        </div>
+        <!-- 保留：手势识别提示 -->
+        <p>
+          如果手势识别遇到问题，请尝试调整摄像头角度并确保光线充足。建议稍微远离摄像头并保持手掌清晰可见。
+        </p>
+
+        <!-- 已删除：技术栈说明 -->
+        <!-- 已删除：开源信息 -->
+        <!-- 已删除：Buy me a coffee 按钮 -->
+        <!-- 已删除：更多项目列表 -->
+        <!-- 已删除：联系信息 -->
+      </div>
+    </div>
+
+    <!-- 苹果风格：社交链接区域 -->
+    <div id="linksDiv">
+      <div class="social-container">
+        <a
+          href="https://github.com/collidingScopes/manual-brick-breaker"
+          target="_blank"
+          rel="noopener"
+          class="social-link"
+        >
+          <i class="fa-brands fa-github"></i>
+        </a>
+        <a
+          href="https://www.buymeacoffee.com/stereoDrift"
+          target="_blank"
+          rel="noopener"
+          class="social-link"
+        >
+          <i class="fa-solid fa-heart"></i>
+        </a>
+        <a
+          href="https://www.instagram.com/stereo.drift/"
+          target="_blank"
+          rel="noopener"
+          class="social-link"
+        >
+          <i class="fa-brands fa-instagram"></i>
+        </a>
+        <a
+          href="https://x.com/measure_plan"
+          target="_blank"
+          rel="noopener"
+          class="social-link"
+        >
+          <span class="x-icon">𝕏</span>
+        </a>
+        <a
+          href="mailto:stereodriftvisuals@gmail.com"
+          target="_blank"
+          rel="noopener"
+          class="social-link"
+        >
+          <i class="fa-solid fa-envelope"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- 苹果风格：提示框容器 -->
+    <div id="alertContainer" class="alert-container"></div>
+  </body>
+
+  <script src="config.js"></script>
+  <script src="gameDataUploader.js"></script>
+  <script src="game.js"></script>
+  
+  <script>
+    // 页面加载完成后的初始化检查
+    window.addEventListener('load', function() {
+      console.log('页面加载完成');
+      
+      // 检查必要的函数是否存在
+      if (typeof startGame !== 'function') {
+        console.error('startGame函数未定义');
+        alert('游戏初始化失败：startGame函数未找到');
+      } else {
+        console.log('startGame函数正常');
+      }
+      
+      if (typeof GameDataUploader !== 'function') {
+        console.error('GameDataUploader类未定义');
+        alert('数据上传功能初始化失败');
+      } else {
+        console.log('GameDataUploader类正常');
+      }
+      
+      // 测试按钮是否可点击
+      const startButton = document.querySelector('.apple-button.primary.large');
+      if (startButton) {
+        console.log('开始游戏按钮找到');
+        // 添加备用点击事件
+        startButton.addEventListener('click', function(e) {
+          console.log('按钮点击事件触发');
+        });
+      } else {
+        console.error('开始游戏按钮未找到');
+      }
+    });
+    
+    // 全局错误捕获
+    window.addEventListener('error', function(e) {
+      console.error('JavaScript错误:', e.message, e.filename, e.lineno);
+    });
+  </script>
+</html>

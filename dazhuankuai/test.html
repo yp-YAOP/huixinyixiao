@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #0056CC;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #e8f4f8;
+        }
+    </style>
+</head>
+<body>
+    <h1>手眼协调训练 - 功能测试</h1>
+    
+    <div class="status" id="status">
+        状态：正在加载...
+    </div>
+    
+    <button class="test-button" onclick="testBasicFunction()">
+        测试基本功能
+    </button>
+    
+    <button class="test-button" onclick="testDataUploader()">
+        测试数据上传
+    </button>
+    
+    <button class="test-button" onclick="openMainGame()">
+        打开主游戏
+    </button>
+    
+    <div id="log" style="margin-top: 20px; padding: 10px; background: #fff; border-radius: 5px; font-family: monospace; font-size: 12px;">
+        <strong>日志:</strong><br>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = '状态：' + message;
+            log('状态更新：' + message);
+        }
+        
+        function testBasicFunction() {
+            log('开始测试基本功能...');
+            updateStatus('基本功能正常');
+            alert('基本功能测试成功！中文显示正常。');
+        }
+        
+        function testDataUploader() {
+            log('测试数据上传功能...');
+            try {
+                // 测试localStorage
+                localStorage.setItem('test', '测试数据');
+                const testData = localStorage.getItem('test');
+                if (testData === '测试数据') {
+                    log('localStorage功能正常');
+                    updateStatus('localStorage测试通过');
+                } else {
+                    log('localStorage功能异常');
+                    updateStatus('localStorage测试失败');
+                }
+                localStorage.removeItem('test');
+            } catch (error) {
+                log('localStorage错误：' + error.message);
+                updateStatus('localStorage错误');
+            }
+        }
+        
+        function openMainGame() {
+            log('打开主游戏...');
+            window.location.href = 'dazhuankuai.html';
+        }
+        
+        // 页面加载完成
+        window.addEventListener('load', function() {
+            log('页面加载完成');
+            updateStatus('页面已就绪');
+        });
+        
+        // 错误捕获
+        window.addEventListener('error', function(e) {
+            log('JavaScript错误：' + e.message);
+            updateStatus('发生错误');
+        });
+    </script>
+</body>
+</html>

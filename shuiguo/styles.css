@@ -1,0 +1,256 @@
+:root {
+    --lakers-purple: #552583;
+    --lakers-gold: #FDB927;
+    --dark-purple: #2c1345;
+    --light-neutral: #f0f0f0;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    background-color: #000;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 50vw;
+    width: 50vw !important;
+    height: 100vh !important;
+    z-index: 1;
+}
+
+#background {
+    position: absolute;
+    top: 0;
+    left: 50vw;
+    width: 50vw;
+    height: 100vh;
+    background: radial-gradient(circle, var(--lakers-purple), var(--dark-purple));
+    z-index: 0;
+}
+
+#video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50vw;
+    height: 100vh;
+    z-index: 2;
+    transform: scaleX(-1);
+    object-fit: cover;
+}
+
+#hand-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50vw;
+    height: 100vh;
+    z-index: 3;
+    pointer-events: none;
+}
+
+#info-container {
+    background: rgba(44, 19, 69, 0.7);
+    border: 2px solid var(--lakers-gold);
+    position: absolute;
+    top: 0px;
+    left: 50vw;
+    padding: 10px 20px;
+    margin: 0 auto;
+    box-shadow: 0 0 15px var(--lakers-gold);
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-width: 0;
+}
+
+#score-container, #lives-container {
+    z-index: 3;
+    color: var(--lakers-gold);
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--lakers-gold);
+}
+
+/* Base Screen Styles */
+.screen-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 4;
+    color: var(--light-neutral);
+    box-sizing: border-box;
+    text-align: center;
+    padding: 20px;
+}
+
+#start-screen {
+    border: 4px solid var(--lakers-purple);
+}
+
+#start-screen h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    color: var(--lakers-gold);
+    text-shadow: 3px 3px 0 var(--lakers-purple);
+    animation: pulse 1.5s infinite alternate;
+}
+
+#start-screen p {
+    font-size: 1.2rem;
+    margin: 8px 0;
+    background-color: rgba(85, 37, 131, 0.6);
+    padding: 8px 15px;
+    border-radius: 8px;
+    max-width: 80%;
+}
+
+#start-button {
+    margin-top: 30px;
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    font-family: inherit;
+    font-weight: bold;
+    background: var(--lakers-gold);
+    color: var(--lakers-purple);
+    border: 2px solid var(--lakers-purple);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 15px rgba(253, 185, 39, 0.5);
+}
+
+#start-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px var(--lakers-gold);
+}
+
+/* Redesigned Game Over Screen */
+#game-over {
+    display: none; /* Initially hidden */
+    border: 4px solid var(--lakers-purple);
+}
+
+#game-over h1 {
+    font-size: 4rem;
+    font-weight: 900;
+    margin-bottom: 25px;
+    color: var(--lakers-gold);
+    text-shadow: 4px 4px 0 var(--lakers-purple), 0 0 10px rgba(253, 185, 39, 0.5);
+}
+
+#game-over p {
+    font-size: 1.5rem;
+    margin: 10px 0;
+    color: var(--light-neutral);
+}
+
+#final-score {
+    color: var(--lakers-gold);
+    font-size: 3.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 20px var(--lakers-gold), 0 0 30px var(--lakers-gold);
+}
+
+#restart-button {
+    margin-top: 30px;
+    padding: 15px 45px;
+    font-size: 1.5rem;
+    font-family: inherit;
+    font-weight: bold;
+    color: var(--lakers-purple);
+    background: linear-gradient(45deg, var(--lakers-gold), #FFD700);
+    border: 2px solid var(--lakers-purple);
+    border-radius: 50px; /* Pill shape */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+#restart-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(253, 185, 39, 0.6);
+}
+
+
+#loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 5;
+    color: var(--lakers-gold);
+    text-shadow: 0 0 5px var(--lakers-gold);
+}
+
+#loading h2 {
+    font-size: 2rem;
+    text-transform: uppercase;
+    animation: blink 1.2s infinite;
+}
+
+.blade-trail {
+    position: absolute;
+    height: 5px;
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 1;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.03); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* Responsive Styling */
+@media screen and (max-width: 768px) {
+    #start-screen h1, #game-over h1 {
+        font-size: 2.5rem;
+    }
+    
+    #start-screen p {
+        font-size: 1rem;
+        max-width: 90%;
+    }
+    
+    #start-button, #restart-button {
+        font-size: 1.2rem;
+        padding: 12px 25px;
+    }
+    
+    #final-score {
+        font-size: 2.5rem;
+    }
+
+    #game-over p {
+        font-size: 1.2rem;
+    }
+}

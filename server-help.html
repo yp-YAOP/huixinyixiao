@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务器启动帮助</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007AFF;
+            padding-bottom: 10px;
+        }
+        .method {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007AFF;
+        }
+        .command {
+            background: #2d3748;
+            color: #68d391;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .links {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .links a {
+            display: block;
+            color: #1976d2;
+            text-decoration: none;
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .links a:hover {
+            background: rgba(25, 118, 210, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 慧心康复训练中心 - 服务器启动帮助</h1>
+        
+        <div class="note">
+            <strong>📝 说明：</strong>由于需要本地服务器来运行游戏，请按照以下任一方法启动HTTP服务器。
+        </div>
+
+        <div class="method">
+            <h3>方法1: Python (推荐)</h3>
+            <p>如果您的系统安装了Python：</p>
+            <div class="command">python -m http.server 8080</div>
+            <p>或者对于Python 2：</p>
+            <div class="command">python -m SimpleHTTPServer 8080</div>
+        </div>
+
+        <div class="method">
+            <h3>方法2: Node.js</h3>
+            <p>如果您的系统安装了Node.js：</p>
+            <div class="command">npx http-server -p 8080</div>
+            <p>或者先安装后使用：</p>
+            <div class="command">npm install -g http-server<br>http-server -p 8080</div>
+        </div>
+
+        <div class="method">
+            <h3>方法3: PHP</h3>
+            <p>如果您的系统安装了PHP：</p>
+            <div class="command">php -S localhost:8080</div>
+        </div>
+
+        <div class="method">
+            <h3>方法4: Live Server (VS Code)</h3>
+            <p>如果您使用VS Code：</p>
+            <ol>
+                <li>安装 "Live Server" 扩展</li>
+                <li>右键点击任意HTML文件</li>
+                <li>选择 "Open with Live Server"</li>
+            </ol>
+        </div>
+
+        <div class="success">
+            <strong>✅ 启动成功后，您将看到：</strong>
+            <p>服务器运行在 http://localhost:8080 或类似地址</p>
+        </div>
+
+        <div class="links">
+            <h3>🎮 游戏入口链接</h3>
+            <p>服务器启动后，点击以下链接访问：</p>
+            <a href="http://localhost:8080/huanzhe.html" target="_blank">🏠 患者选择页面</a>
+            <a href="http://localhost:8080/yihu.html" target="_blank">🏥 医护工作站</a>
+            <a href="http://localhost:8080/dazhuankuai/dazhuankuai.html" target="_blank">🎯 手眼协调训练</a>
+            <a href="http://localhost:8080/shuiguo/index.html" target="_blank">🍎 反应速度训练</a>
+            <a href="http://localhost:8080/renzhi/renzhi.html" target="_blank">🧠 认知能力训练</a>
+            <a href="http://localhost:8080/shuiguo/test-upload.html" target="_blank">🧪 数据上传测试</a>
+        </div>
+
+        <div class="note">
+            <strong>💡 数据同步说明：</strong>
+            <ul>
+                <li>每个游戏每15秒自动上传训练数据</li>
+                <li>李阿姨(ID:102)的数据会实时显示在医护工作站</li>
+                <li>实时通知会显示具体的得分和训练时长</li>
+                <li>数据通过localStorage在本地传输</li>
+            </ul>
+        </div>
+
+        <div class="method">
+            <h3>🔧 故障排除</h3>
+            <p>如果遇到问题：</p>
+            <ol>
+                <li>确保没有其他程序占用8080端口</li>
+                <li>尝试使用不同的端口号（如8000、3000等）</li>
+                <li>检查防火墙设置</li>
+                <li>使用Chrome或Edge浏览器（推荐）</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 检测服务器是否运行
+        function checkServer() {
+            fetch('/')
+                .then(() => {
+                    const links = document.querySelectorAll('.links a');
+                    links.forEach(link => {
+                        link.style.background = '#c8e6c9';
+                        link.style.fontWeight = 'bold';
+                    });
+                    
+                    const successDiv = document.querySelector('.success');
+                    successDiv.innerHTML = '<strong>🎉 服务器检测：运行中！</strong><p>您可以直接点击上方链接访问游戏。</p>';
+                })
+                .catch(() => {
+                    console.log('服务器尚未启动');
+                });
+        }
+        
+        // 页面加载后检测服务器
+        window.addEventListener('load', () => {
+            setTimeout(checkServer, 1000);
+        });
+    </script>
+</body>
+</html>

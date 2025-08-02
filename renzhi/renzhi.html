@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数字认知训练 - 主题增强版</title>
+    <style>
+      /* 🎯 主题增强版 - 支持4种高级配色主题 */
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* 🎯 CSS变量系统 - 支持动态主题切换 */
+      :root {
+        /* 默认主题：紫金配色 */
+        --primary-bg: linear-gradient(135deg, #2d1b69, #1a0f3a);
+        --primary-color: #ffd700;
+        --secondary-color: #4b0082;
+        --accent-color: #ff6b6b;
+        --text-primary: #ffffff;
+        --text-secondary: #e0e0e0;
+        --text-muted: #b0b0b0;
+        --success-color: #4cd964;
+        --error-color: #ff4757;
+        --warning-color: #ffa502;
+        --border-color: rgba(255, 215, 0, 0.3);
+        --surface-bg: rgba(255, 255, 255, 0.05);
+        --surface-border: rgba(255, 215, 0, 0.3);
+        --shadow-color: rgba(255, 215, 0, 0.3);
+        --glow-color: rgba(255, 215, 0, 0.8);
+      }
+
+      /* 🎯 深空灰主题 */
+      .theme-space-gray {
+        --primary-bg: linear-gradient(135deg, #1f1f1f, #0a0a0a);
+        --primary-color: #e0e0e0;
+        --secondary-color: #4a4a4a;
+        --accent-color: #ff6b6b;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --text-muted: #888888;
+        --success-color: #4cd964;
+        --error-color: #ff4757;
+        --warning-color: #ffa502;
+        --border-color: rgba(224, 224, 224, 0.3);
+        --surface-bg: rgba(255, 255, 255, 0.05);
+        --surface-border: rgba(224, 224, 224, 0.3);
+        --shadow-color: rgba(224, 224, 224, 0.3);
+        --glow-color: rgba(224, 224, 224, 0.8);
+      }
+
+      /* 🎯 薄荷绿主题 */
+      .theme-mint-green {
+        --primary-bg: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+        --primary-color: #2e7d32;
+        --secondary-color: #81c784;
+        --accent-color: #ff6b6b;
+        --text-primary: #1b5e20;
+        --text-secondary: #2e7d32;
+        --text-muted: #4caf50;
+        --success-color: #4cd964;
+        --error-color: #ff4757;
+        --warning-color: #ffa502;
+        --border-color: rgba(46, 125, 50, 0.3);
+        --surface-bg: rgba(46, 125, 50, 0.05);
+        --surface-border: rgba(46, 125, 50, 0.3);
+        --shadow-color: rgba(46, 125, 50, 0.3);
+        --glow-color: rgba(46, 125, 50, 0.8);
+      }
+
+      /* 🎯 珊瑚粉主题 */
+      .theme-coral-pink {
+        --primary-bg: linear-gradient(135deg, #fff3f0, #ffebee);
+        --primary-color: #d32f2f;
+        --secondary-color: #ff6b6b;
+        --accent-color: #2196f3;
+        --text-primary: #b71c1c;
+        --text-secondary: #d32f2f;
+        --text-muted: #f44336;
+        --success-color: #4cd964;
+        --error-color: #ff4757;
+        --warning-color: #ffa502;
+        --border-color: rgba(211, 47, 47, 0.3);
+        --surface-bg: rgba(211, 47, 47, 0.05);
+        --surface-border: rgba(211, 47, 47, 0.3);
+        --shadow-color: rgba(211, 47, 47, 0.3);
+        --glow-color: rgba(211, 47, 47, 0.8);
+      }
+
+      body {
+        font-family: "Microsoft YaHei", Arial, sans-serif;
+        background: var(--primary-bg);
+        min-height: 100vh;
+        color: var(--text-primary);
+        overflow-x: hidden;
+        transition: all 0.3s ease;
+      }
+
+      /* 🎯 主题切换器 */
+      .theme-switcher {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: var(--surface-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 15px;
+        padding: 15px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 20px var(--shadow-color);
+        min-width: 220px; /* 为横向布局增加最小宽度 */
+      }
+
+      .theme-switcher-title {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 10px;
+        font-weight: bold;
+      }
+
+      .theme-options {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 改为横向4列布局 */
+        gap: 8px;
+      }
+
+      .theme-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .theme-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+      }
+
+      .theme-btn.active {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 20px var(--glow-color);
+        transform: scale(1.15);
+      }
+
+      /* 🎯 主题按钮具体配色 */
+      .theme-btn.purple-gold {
+        background: linear-gradient(135deg, #4b0082, #ffd700);
+      }
+
+      .theme-btn.space-gray {
+        background: linear-gradient(135deg, #1f1f1f, #4a4a4a);
+      }
+
+      .theme-btn.mint-green {
+        background: linear-gradient(135deg, #e8f5e8, #81c784);
+      }
+
+      .theme-btn.coral-pink {
+        background: linear-gradient(135deg, #fff3f0, #ff6b6b);
+      }
+
+      .theme-btn::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+      }
+
+      .theme-btn:active::after {
+        width: 100%;
+        height: 100%;
+      }
+
+      .main-container {
+        display: grid;
+        grid-template-areas:
+          "header header header"
+          "sidebar camera info"
+          "controls controls controls";
+        grid-template-columns: 250px 1fr 280px;
+        grid-template-rows: auto 1fr auto;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        gap: 20px;
+        min-height: 100vh;
+      }
+
+      .header {
+        grid-area: header;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+        text-shadow: 0 0 20px var(--glow-color);
+        transition: all 0.3s ease;
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        opacity: 0.9;
+      }
+
+      .task-sidebar {
+        grid-area: sidebar;
+        background: var(--surface-bg);
+        border-radius: 15px;
+        padding: 20px;
+        border: 2px solid var(--surface-border);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px var(--shadow-color);
+      }
+
+      .target-display {
+        text-align: center;
+        padding: 20px;
+        background: var(--surface-bg);
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+      }
+
+      .target-number {
+        font-size: 80px;
+        color: var(--primary-color);
+        font-weight: bold;
+        text-shadow: 0 0 30px var(--glow-color);
+        line-height: 1;
+        transition: all 0.5s ease;
+      }
+
+      .target-number.correct {
+        animation: correctPulse 0.5s ease 3;
+      }
+      .target-number.wrong {
+        animation: wrongShake 0.3s ease 2;
+      }
+
+      @keyframes correctPulse {
+        0% {
+          box-shadow: 0 0 0 0 var(--success-color);
+          transform: scale(1);
+        }
+        70% {
+          box-shadow: 0 0 0 20px transparent;
+          transform: scale(1.05);
+        }
+        100% {
+          box-shadow: 0 0 0 0 transparent;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes wrongShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-10px);
+        }
+        75% {
+          transform: translateX(10px);
+        }
+      }
+
+      .finger-guide {
+        font-size: 3rem;
+        margin: 10px 0;
+      }
+
+      .camera-section {
+        grid-area: camera;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+
+      #camera-container {
+        position: relative;
+        border: 3px solid var(--primary-color);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 0 30px var(--shadow-color);
+        transition: all 0.3s ease;
+      }
+
+      #webcam {
+        width: 480px;
+        height: 360px;
+        background: var(--secondary-color);
+        display: block;
+      }
+
+      #output-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 480px;
+        height: 360px;
+        pointer-events: none;
+      }
+
+      .status-panel {
+        width: 100%;
+        max-width: 480px;
+        background: var(--surface-bg);
+        border-radius: 15px;
+        padding: 15px;
+        border: 2px solid var(--surface-border);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+      }
+
+      .current-detection {
+        text-align: center;
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .confidence-display {
+        text-align: center;
+        font-size: 1rem;
+        color: var(--success-color);
+        margin-bottom: 10px;
+        font-weight: bold;
+      }
+
+      .operation-hints {
+        text-align: center;
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: 10px;
+      }
+
+      .progress-container {
+        margin-top: 10px;
+      }
+
+      .progress-bar {
+        height: 8px;
+        background: var(--surface-bg);
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(
+          to right,
+          var(--error-color),
+          var(--success-color),
+          var(--primary-color)
+        );
+        width: 0%;
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+
+      .progress-text {
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-top: 5px;
+      }
+
+      .info-sidebar {
+        grid-area: info;
+        background: var(--surface-bg);
+        border-radius: 15px;
+        padding: 20px;
+        border: 2px solid var(--surface-border);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px var(--shadow-color);
+      }
+
+      .recognition-title {
+        font-size: 1.3rem;
+        color: var(--primary-color);
+        text-align: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+      }
+
+      .finger-analysis {
+        margin-bottom: 20px;
+      }
+
+      .finger-detail {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+      }
+
+      .finger-name {
+        color: var(--text-secondary);
+        min-width: 60px;
+      }
+
+      .finger-metrics {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .angle-value {
+        color: var(--success-color);
+        font-weight: bold;
+        min-width: 45px;
+        text-align: right;
+      }
+
+      .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 1px solid var(--text-primary);
+        transition: all 0.3s ease;
+      }
+
+      .status-indicator.extended {
+        background: var(--success-color);
+        box-shadow: 0 0 8px var(--success-color);
+      }
+
+      .status-indicator.folded {
+        background: var(--error-color);
+        box-shadow: 0 0 8px var(--error-color);
+      }
+
+      .algorithm-status {
+        border-top: 1px solid var(--border-color);
+        padding-top: 15px;
+        margin-top: 15px;
+      }
+
+      .status-item {
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .status-label {
+        color: var(--text-muted);
+      }
+
+      .status-value {
+        color: var(--primary-color);
+        font-weight: bold;
+      }
+
+      .stability-indicator {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+
+      .stability-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-muted);
+        transition: background 0.3s;
+      }
+
+      .stability-dot.active {
+        background: var(--success-color);
+        box-shadow: 0 0 8px var(--success-color);
+      }
+
+      .controls {
+        grid-area: controls;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: var(--surface-bg);
+        border-radius: 15px;
+        border: 2px solid var(--surface-border);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px var(--shadow-color);
+      }
+
+      .score-display {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        font-weight: bold;
+      }
+
+      .feedback-area {
+        flex: 1;
+        text-align: center;
+        margin: 0 20px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .feedback {
+        font-size: 1.3rem;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+
+      .feedback.success {
+        color: var(--success-color);
+        background: var(--surface-bg);
+        border: 1px solid var(--success-color);
+      }
+
+      .feedback.error {
+        color: var(--error-color);
+        background: var(--surface-bg);
+        border: 1px solid var(--error-color);
+      }
+
+      .feedback.hint {
+        color: var(--primary-color);
+        background: var(--surface-bg);
+        border: 1px solid var(--primary-color);
+      }
+
+      .restart-btn {
+        padding: 12px 25px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 25px;
+        background: linear-gradient(
+          45deg,
+          var(--accent-color),
+          var(--error-color)
+        );
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px var(--shadow-color);
+      }
+
+      .restart-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px var(--shadow-color);
+      }
+
+      /* 🎯 主题切换动画效果 */
+      .theme-transition {
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 1200px) {
+        .main-container {
+          grid-template-areas:
+            "header"
+            "camera"
+            "sidebar"
+            "info"
+            "controls";
+          grid-template-columns: 1fr;
+          grid-template-rows: auto auto auto auto auto;
+          gap: 15px;
+        }
+
+        .task-sidebar,
+        .info-sidebar {
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
+        .theme-switcher {
+          top: 10px;
+          right: 10px;
+          padding: 10px;
+        }
+
+        .theme-options {
+          grid-template-columns: repeat(4, 1fr);
+        }
+
+        .theme-btn {
+          width: 35px;
+          height: 35px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        #webcam,
+        #output-canvas {
+          width: 320px;
+          height: 240px;
+        }
+
+        .target-number {
+          font-size: 60px;
+        }
+
+        .controls {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .theme-switcher {
+          position: relative;
+          top: auto;
+          right: auto;
+          margin: 10px auto;
+          width: fit-content;
+        }
+      }
+
+      /* 🎯 主题切换时的特殊效果 */
+      .theme-changing {
+        animation: themeTransition 0.5s ease;
+      }
+
+      @keyframes themeTransition {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(0.98);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      /* 🎯 响应式设计 - 确保认知训练在所有设备上完美显示 */
+      body {
+        overflow-x: hidden;
+        min-height: 100vh;
+        font-size: clamp(14px, 2vw, 16px);
+      }
+
+      .main-container {
+        width: 100%;
+        min-height: 100vh;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+
+      .game-container {
+        width: 100%;
+        max-width: min(800px, 90vw);
+        margin: 0 auto;
+        aspect-ratio: 4/3;
+        min-height: 400px;
+      }
+
+      @media (max-width: 1200px) {
+        .game-layout {
+          flex-direction: column;
+          align-items: center;
+          gap: 1.5rem;
+        }
+
+        .central-game-area {
+          max-width: 100%;
+        }
+
+        .info-sidebar {
+          width: 100%;
+          max-width: 600px;
+        }
+
+        #webcam,
+        #output-canvas {
+          width: min(480px, 90vw);
+          height: min(360px, 67.5vw);
+        }
+
+        .target-number {
+          font-size: 3.5rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .game-layout {
+          padding: 0.5rem;
+          gap: 1rem;
+        }
+
+        #webcam,
+        #output-canvas {
+          width: min(400px, 95vw);
+          height: min(300px, 71.25vw);
+        }
+
+        .target-number {
+          font-size: 3rem;
+        }
+
+        .finger-guide {
+          font-size: 2rem;
+        }
+
+        .current-detection {
+          font-size: 1.5rem;
+        }
+
+        .controls {
+          flex-direction: column;
+          gap: 15px;
+          padding: 15px;
+        }
+
+        .theme-switcher {
+          position: relative;
+          top: auto;
+          right: auto;
+          margin: 10px auto 20px;
+          width: fit-content;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .target-card,
+        .detection-card {
+          padding: 1rem;
+        }
+
+        .target-number {
+          font-size: 2.5rem;
+        }
+
+        .finger-guide {
+          font-size: 1.8rem;
+        }
+
+        .target-instruction {
+          font-size: 1rem;
+        }
+
+        .theme-instruction {
+          font-size: 0.8rem;
+        }
+      }
+
+      /* 横屏模式优化 */
+      @media (max-height: 500px) and (orientation: landscape) {
+        .container {
+          padding: 5px;
+        }
+
+        .game-container {
+          min-height: 200px;
+          aspect-ratio: 6/3;
+        }
+
+        .card {
+          min-height: 40px;
+          font-size: 0.7rem;
+          padding: 5px;
+        }
+
+        .controls {
+          flex-direction: row;
+          gap: 10px;
+          padding: 8px;
+        }
+      }
+
+      /* 确保所有元素不会溢出 */
+      .game-area,
+      .theme-panel,
+      .modal {
+        max-width: 100vw;
+        overflow: hidden;
+      }
+
+      /* 主题面板响应式 */
+      .theme-panel {
+        width: min(300px, 90vw);
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      @media (max-width: 480px) {
+        .theme-panel {
+          width: min(280px, 95vw);
+          padding: 15px;
+        }
+
+        .theme-option {
+          padding: 8px;
+          font-size: 0.8rem;
+        }
+      }
+
+      /* 数据上传提示样式 */
+      .upload-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        z-index: 10000;
+        font-family: Inter, sans-serif;
+        font-size: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="theme-transition">
+    <!-- 🎯 主题切换器 -->
+    <div class="theme-switcher">
+      <div class="theme-switcher-title">🎨 选择主题</div>
+      <div class="theme-options">
+        <div
+          class="theme-btn purple-gold active"
+          data-theme="purple-gold"
+          title="紫金主题"
+        ></div>
+        <div
+          class="theme-btn space-gray"
+          data-theme="space-gray"
+          title="深空灰主题"
+        ></div>
+        <div
+          class="theme-btn mint-green"
+          data-theme="mint-green"
+          title="薄荷绿主题"
+        ></div>
+        <div
+          class="theme-btn coral-pink"
+          data-theme="coral-pink"
+          title="珊瑚粉主题"
+        ></div>
+      </div>
+    </div>
+
+    <div class="main-container">
+      <!-- 🎯 主题切换器 -->
+      <div class="theme-switcher">
+        <div class="theme-switcher-title">🎨 选择主题</div>
+        <div class="theme-options">
+          <div
+            class="theme-btn purple-gold active"
+            data-theme="purple-gold"
+            title="紫金主题"
+          ></div>
+          <div
+            class="theme-btn space-gray"
+            data-theme="space-gray"
+            title="深空灰主题"
+          ></div>
+          <div
+            class="theme-btn mint-green"
+            data-theme="mint-green"
+            title="薄荷绿主题"
+          ></div>
+          <div
+            class="theme-btn coral-pink"
+            data-theme="coral-pink"
+            title="珊瑚粉主题"
+          ></div>
+        </div>
+      </div>
+
+      <!-- 标题区域 -->
+      <header class="header">
+        <h1>🧠 数字认知训练</h1>
+        <p>主题增强版 - 4种高级配色可选</p>
+      </header>
+
+      <!-- 左侧任务栏 -->
+      <div class="task-sidebar">
+        <div class="target-display">
+          <div class="target-number" id="targetNumber">3</div>
+          <div class="finger-guide" id="fingerGuide">🤟</div>
+        </div>
+        <div
+          style="
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 10px;
+          "
+        >
+          请比出对应的手指数量
+        </div>
+        <div
+          style="
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+          "
+        >
+          支持主题切换，个性化体验
+        </div>
+      </div>
+
+      <!-- 中央摄像头区 -->
+      <div class="camera-section">
+        <div id="camera-container">
+          <video id="webcam" autoplay muted playsinline></video>
+          <canvas id="output-canvas"></canvas>
+        </div>
+
+        <div class="status-panel">
+          <div class="current-detection" id="currentDetection">准备识别...</div>
+          <div class="confidence-display" id="confidenceDisplay">
+            置信度: 等待中...
+          </div>
+          <div class="operation-hints" id="operationHints">
+            请将手放在摄像头前
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">等待手势...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧详细识别信息 -->
+      <div class="info-sidebar">
+        <div class="recognition-title">🔍 识别详情</div>
+
+        <!-- 手指角度分析 -->
+        <div class="finger-analysis">
+          <div class="finger-detail">
+            <span class="finger-name">👍 拇指</span>
+            <div class="finger-metrics">
+              <span class="angle-value" id="thumbAngle">--°</span>
+              <div class="status-indicator folded" id="thumbIndicator"></div>
+            </div>
+          </div>
+          <div class="finger-detail">
+            <span class="finger-name">👆 食指</span>
+            <div class="finger-metrics">
+              <span class="angle-value" id="indexAngle">--°</span>
+              <div class="status-indicator folded" id="indexIndicator"></div>
+            </div>
+          </div>
+          <div class="finger-detail">
+            <span class="finger-name">🖕 中指</span>
+            <div class="finger-metrics">
+              <span class="angle-value" id="middleAngle">--°</span>
+              <div class="status-indicator folded" id="middleIndicator"></div>
+            </div>
+          </div>
+          <div class="finger-detail">
+            <span class="finger-name">💍 无名指</span>
+            <div class="finger-metrics">
+              <span class="angle-value" id="ringAngle">--°</span>
+              <div class="status-indicator folded" id="ringIndicator"></div>
+            </div>
+          </div>
+          <div class="finger-detail">
+            <span class="finger-name">🤙 小指</span>
+            <div class="finger-metrics">
+              <span class="angle-value" id="pinkyAngle">--°</span>
+              <div class="status-indicator folded" id="pinkyIndicator"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 算法状态 -->
+        <div class="algorithm-status">
+          <div class="status-item">
+            <span class="status-label">当前主题:</span>
+            <span class="status-value" id="currentTheme">紫金配色</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">检测精度:</span>
+            <span class="status-value" id="detectionPrecision">准备中</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">稳定性:</span>
+            <div class="stability-indicator" id="stabilityIndicator">
+              <div class="stability-dot"></div>
+              <div class="stability-dot"></div>
+              <div class="stability-dot"></div>
+              <div class="stability-dot"></div>
+              <div class="stability-dot"></div>
+            </div>
+          </div>
+          <div class="status-item">
+            <span class="status-label">置信度:</span>
+            <span class="status-value" id="algorithmConfidence">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部控制区域 -->
+      <div class="controls">
+        <div class="score-display">得分：<span id="scoreDisplay">0</span></div>
+
+        <div class="feedback-area">
+          <div class="feedback hint" id="feedback">
+            主题增强版已启动，点击右上角切换主题
+          </div>
+        </div>
+
+        <button class="restart-btn" id="restartBtn">重新开始</button>
+      </div>
+    </div>
+
+    <!-- MediaPipe依赖 -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.min.js"></script>
+    
+    <!-- 数据上传工具库 -->
+    <script src="gameDataUploader.js"></script>
+
+    <script>
+      // 🎯 主题增强版 - 集成高精度识别 + 多主题切换
+      class ThemeEnhancedGame {
+        constructor() {
+          // 游戏状态
+          this.score = 0;
+          this.targetNumber = 1;
+          this.isGameActive = false;
+          
+          // 使用新的数据上传器
+          this.dataUploader = null;
+
+          // 高精度识别参数
+          this.currentFingers = 0;
+          this.fingerHistory = [];
+          this.stableFrames = 0;
+          this.REQUIRED_FRAMES = 20; // 进一步减少稳定帧数
+          this.HISTORY_SIZE = 5; // 减少历史记录大小
+          this.CONFIDENCE_THRESHOLD = 0.4; // 降低置信度阈值，提高敏感度
+
+          // 游戏控制状态
+          this.waitingForNextRound = false; // 等待下一轮的标志位
+
+          // 🎯 主题系统
+          this.themes = {
+            "purple-gold": {
+              name: "紫金配色",
+              className: "",
+            },
+            "space-gray": {
+              name: "深空灰",
+              className: "theme-space-gray",
+            },
+            "mint-green": {
+              name: "薄荷绿",
+              className: "theme-mint-green",
+            },
+            "coral-pink": {
+              name: "珊瑚粉",
+              className: "theme-coral-pink",
+            },
+          };
+
+          this.currentThemeName = "purple-gold";
+
+          // 角度识别阈值 - 优化阈值使识别更准确
+          this.ANGLE_THRESHOLDS = {
+            thumb: 120, // 降低拇指阈值，从140改为120
+            index: 140, // 降低食指阈值，从160改为140
+            middle: 140, // 降低中指阈值，从160改为140
+            ring: 130, // 降低无名指阈值，从155改为130
+            pinky: 120, // 降低小指阈值，从150改为120
+          };
+
+          // DOM元素
+          this.webcam = document.getElementById("webcam");
+          this.outputCanvas = document.getElementById("output-canvas");
+          this.canvasContext = this.outputCanvas.getContext("2d");
+          this.targetNumberDisplay = document.getElementById("targetNumber");
+          this.fingerGuide = document.getElementById("fingerGuide");
+          this.currentDetection = document.getElementById("currentDetection");
+          this.confidenceDisplay = document.getElementById("confidenceDisplay");
+          this.operationHints = document.getElementById("operationHints");
+          this.progressFill = document.getElementById("progressFill");
+          this.progressText = document.getElementById("progressText");
+          this.scoreDisplay = document.getElementById("scoreDisplay");
+          this.feedback = document.getElementById("feedback");
+          this.restartBtn = document.getElementById("restartBtn");
+
+          // 识别信息元素
+          this.angleElements = {
+            thumb: document.getElementById("thumbAngle"),
+            index: document.getElementById("indexAngle"),
+            middle: document.getElementById("middleAngle"),
+            ring: document.getElementById("ringAngle"),
+            pinky: document.getElementById("pinkyAngle"),
+          };
+
+          this.indicatorElements = {
+            thumb: document.getElementById("thumbIndicator"),
+            index: document.getElementById("indexIndicator"),
+            middle: document.getElementById("middleIndicator"),
+            ring: document.getElementById("ringIndicator"),
+            pinky: document.getElementById("pinkyIndicator"),
+          };
+
+          this.detectionPrecision =
+            document.getElementById("detectionPrecision");
+          this.stabilityIndicator =
+            document.getElementById("stabilityIndicator");
+          this.algorithmConfidence = document.getElementById(
+            "algorithmConfidence"
+          );
+          this.currentThemeDisplay = document.getElementById("currentTheme");
+
+          // 主题按钮
+          this.themeButtons = document.querySelectorAll(".theme-btn");
+
+          // MediaPipe
+          this.hands = null;
+          this.camera = null;
+
+          this.init();
+        }
+
+        init() {
+          this.initThemeSystem();
+          this.initMediaPipe();
+          this.addEventListeners();
+          this.generateTargetNumber();
+          this.startGame();
+        }
+
+        // 🎯 初始化主题系统
+        initThemeSystem() {
+          // 读取保存的主题偏好
+          const savedTheme =
+            localStorage.getItem("game-theme") || "purple-gold";
+          this.switchTheme(savedTheme);
+
+          // 绑定主题按钮事件
+          this.themeButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const theme = btn.dataset.theme;
+              this.switchTheme(theme);
+            });
+          });
+        }
+
+        // 🎯 主题切换核心函数
+        switchTheme(themeName) {
+          if (!this.themes[themeName]) return;
+
+          const body = document.body;
+          const theme = this.themes[themeName];
+
+          // 添加切换动画
+          body.classList.add("theme-changing");
+
+          // 移除所有主题类
+          Object.values(this.themes).forEach((t) => {
+            if (t.className) {
+              body.classList.remove(t.className);
+            }
+          });
+
+          // 应用新主题
+          if (theme.className) {
+            body.classList.add(theme.className);
+          }
+
+          // 更新当前主题
+          this.currentThemeName = themeName;
+          this.currentThemeDisplay.textContent = theme.name;
+
+          // 更新按钮状态
+          this.updateThemeButtonState();
+
+          // 保存主题偏好
+          localStorage.setItem("game-theme", themeName);
+
+          // 播放主题切换音效
+          this.playThemeChangeSound();
+
+          // 移除动画类
+          setTimeout(() => {
+            body.classList.remove("theme-changing");
+          }, 500);
+
+          console.log(`🎨 主题已切换至: ${theme.name}`);
+        }
+
+        // 🎯 更新主题按钮状态
+        updateThemeButtonState() {
+          this.themeButtons.forEach((btn) => {
+            if (btn.dataset.theme === this.currentThemeName) {
+              btn.classList.add("active");
+            } else {
+              btn.classList.remove("active");
+            }
+          });
+        }
+
+        // 🎯 主题切换音效
+        playThemeChangeSound() {
+          try {
+            const audioContext = new (window.AudioContext ||
+              window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(
+              1200,
+              audioContext.currentTime + 0.1
+            );
+            oscillator.type = "sine";
+
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(
+              0.01,
+              audioContext.currentTime + 0.2
+            );
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+          } catch (e) {
+            // 音效播放失败，静默处理
+          }
+        }
+
+        initMediaPipe() {
+          this.hands = new Hands({
+            locateFile: (file) =>
+              `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`,
+          });
+
+          this.hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.8,
+            minTrackingConfidence: 0.8,
+          });
+
+          this.hands.onResults((results) => {
+            this.onHandsResults(results);
+          });
+
+          this.initCamera();
+        }
+
+        async initCamera() {
+          try {
+            // 检查浏览器兼容性
+            if (!this.checkBrowserCompatibility()) {
+              return;
+            }
+
+            this.outputCanvas.width = 480;
+            this.outputCanvas.height = 360;
+
+            this.camera = new Camera(this.webcam, {
+              onFrame: async () => {
+                await this.hands.send({ image: this.webcam });
+              },
+              width: 480,
+              height: 360,
+              facingMode: "user",
+            });
+
+            await this.camera.start();
+            this.operationHints.textContent = "多主题识别系统已启动";
+            this.detectionPrecision.textContent = "已就绪";
+          } catch (error) {
+            console.error("摄像头启动失败:", error);
+            this.handleCameraError(error);
+          }
+        }
+
+        checkBrowserCompatibility() {
+          console.log('🔍 检查浏览器兼容性...');
+          console.log('当前协议:', window.location.protocol);
+          console.log('当前域名:', window.location.host);
+          
+          // 检查是否支持 getUserMedia
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.error('❌ 浏览器不支持 getUserMedia API');
+            this.operationHints.textContent = "您的浏览器不支持摄像头功能";
+            this.operationHints.style.color = "var(--error-color)";
+            
+            // 显示详细的解决方案
+            setTimeout(() => {
+              alert('浏览器不支持摄像头功能\n\n解决方案：\n1. 请使用最新版本的Chrome、Firefox或Edge浏览器\n2. 确保浏览器已更新到最新版本');
+            }, 1000);
+            return false;
+          }
+
+          // 检查HTTPS协议
+          if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            console.error('❌ 摄像头功能需要HTTPS协议');
+            this.operationHints.textContent = "摄像头功能需要安全连接";
+            this.operationHints.style.color = "var(--warning-color)";
+            
+            // 生成HTTPS链接
+            const httpsUrl = window.location.href.replace('http://', 'https://').replace(':3000', ':3443');
+            
+            setTimeout(() => {
+              const result = confirm('摄像头功能需要HTTPS安全连接\n\n当前使用的是HTTP连接，无法访问摄像头\n\n点击"确定"跳转到HTTPS版本\n点击"取消"继续使用（但无法使用摄像头）');
+              if (result) {
+                window.location.href = httpsUrl;
+              } else {
+                this.operationHints.textContent = "无摄像头模式（仅支持鼠标操作）";
+                this.operationHints.style.color = "var(--warning-color)";
+              }
+            }, 1000);
+            return false;
+          }
+
+          console.log('✅ 浏览器兼容性检查通过');
+          return true;
+        }
+
+        handleCameraError(error) {
+          console.error('摄像头错误详情:', error);
+          
+          if (error.name === 'NotAllowedError') {
+            this.operationHints.textContent = "请允许摄像头权限访问";
+            this.operationHints.style.color = "var(--warning-color)";
+            
+            setTimeout(() => {
+              alert('摄像头权限被拒绝\n\n解决方案：\n1. 点击地址栏左侧的摄像头图标\n2. 选择"允许"摄像头访问\n3. 刷新页面重试');
+            }, 1000);
+          } else if (error.name === 'NotFoundError') {
+            this.operationHints.textContent = "未检测到摄像头设备";
+            this.operationHints.style.color = "var(--error-color)";
+            
+            setTimeout(() => {
+              alert('未检测到摄像头设备\n\n请检查：\n1. 摄像头是否正确连接\n2. 摄像头是否被其他应用占用\n3. 设备管理器中摄像头状态');
+            }, 1000);
+          } else if (error.name === 'NotReadableError') {
+            this.operationHints.textContent = "摄像头设备被占用";
+            this.operationHints.style.color = "var(--error-color)";
+            
+            setTimeout(() => {
+              alert('摄像头设备被占用\n\n解决方案：\n1. 关闭其他使用摄像头的应用\n2. 重启浏览器\n3. 重新连接摄像头设备');
+            }, 1000);
+          } else {
+            this.operationHints.textContent = "摄像头启动失败，请检查设备";
+            this.operationHints.style.color = "var(--error-color)";
+            
+            setTimeout(() => {
+              alert(`摄像头启动失败\n\n错误类型: ${error.name}\n错误信息: ${error.message}\n\n建议：\n1. 刷新页面重试\n2. 检查摄像头权限设置\n3. 使用HTTPS连接`);
+            }, 1000);
+          }
+        }
+
+        onHandsResults(results) {
+          this.canvasContext.clearRect(
+            0,
+            0,
+            this.outputCanvas.width,
+            this.outputCanvas.height
+          );
+
+          if (
+            results.multiHandLandmarks &&
+            results.multiHandLandmarks.length > 0
+          ) {
+            const landmarks = results.multiHandLandmarks[0];
+
+            const palmSize = this.calculatePalmSize(landmarks);
+            if (palmSize < 0.08) {
+              this.operationHints.textContent =
+                "请将手靠近摄像头（距离30cm内）";
+              this.resetDetection();
+              return;
+            } else {
+              this.operationHints.textContent = "距离合适，正在识别...";
+            }
+
+            this.drawAdvancedHandLandmarks(landmarks);
+
+            const fingerAnalysis = this.analyzeFingerAngles(landmarks);
+            this.updateFingerDisplay(fingerAnalysis);
+
+            const currentCount = this.calculateFingerCount(fingerAnalysis);
+            this.updateStabilityAnalysis(currentCount);
+
+            this.updateDetectionInfo(fingerAnalysis, palmSize);
+            this.processStableGesture();
+          } else {
+            this.operationHints.textContent = "请将手放在摄像头前";
+            this.resetDetection();
+          }
+        }
+
+        // 使用改进的手指识别算法 - 基于关节点位置而非角度
+        analyzeFingerAngles(landmarks) {
+          const fingerData = {
+            thumb: this.isFingerExtended(landmarks, "thumb"),
+            index: this.isFingerExtended(landmarks, "index"),
+            middle: this.isFingerExtended(landmarks, "middle"),
+            ring: this.isFingerExtended(landmarks, "ring"),
+            pinky: this.isFingerExtended(landmarks, "pinky"),
+          };
+
+          const analysis = {};
+          Object.keys(fingerData).forEach((finger) => {
+            const isExtended = fingerData[finger].isExtended;
+            const confidence = fingerData[finger].confidence;
+
+            analysis[finger] = {
+              angle: fingerData[finger].simulatedAngle, // 模拟角度用于显示
+              threshold: this.ANGLE_THRESHOLDS[finger],
+              isExtended: isExtended,
+              confidence: confidence,
+            };
+          });
+
+          return analysis;
+        }
+
+        // 新的手指识别方法 - 增强鲁棒性，适应角度和距离变化
+        isFingerExtended(landmarks, fingerName) {
+          let tipIndex,
+            pipIndex,
+            mcpIndex,
+            wristIndex = 0;
+
+          // 定义各手指的关键点索引
+          switch (fingerName) {
+            case "thumb":
+              tipIndex = 4;
+              pipIndex = 3;
+              mcpIndex = 2;
+              break;
+            case "index":
+              tipIndex = 8;
+              pipIndex = 6;
+              mcpIndex = 5;
+              break;
+            case "middle":
+              tipIndex = 12;
+              pipIndex = 10;
+              mcpIndex = 9;
+              break;
+            case "ring":
+              tipIndex = 16;
+              pipIndex = 14;
+              mcpIndex = 13;
+              break;
+            case "pinky":
+              tipIndex = 20;
+              pipIndex = 18;
+              mcpIndex = 17;
+              break;
+          }
+
+          const tip = landmarks[tipIndex];
+          const pip = landmarks[pipIndex];
+          const mcp = landmarks[mcpIndex];
+          const wrist = landmarks[wristIndex];
+
+          let isExtended = false;
+          let confidence = 0.5;
+          let simulatedAngle = 90;
+
+          // 计算手的整体尺度（用于距离补偿）
+          const handSize = Math.sqrt(
+            Math.pow(landmarks[0].x - landmarks[9].x, 2) +
+              Math.pow(landmarks[0].y - landmarks[9].y, 2)
+          );
+
+          if (fingerName === "thumb") {
+            // 拇指识别 - 加强与其他手指的相对位置判断
+            const thumbTipToWrist = Math.sqrt(
+              Math.pow(tip.x - wrist.x, 2) + Math.pow(tip.y - wrist.y, 2)
+            );
+            const thumbMcpToWrist = Math.sqrt(
+              Math.pow(mcp.x - wrist.x, 2) + Math.pow(mcp.y - wrist.y, 2)
+            );
+
+            const distanceRatio = thumbTipToWrist / thumbMcpToWrist;
+            const xDiff = Math.abs(tip.x - mcp.x);
+            const yDiff = Math.abs(tip.y - mcp.y);
+
+            // 获取其他手指的信息用于相对位置判断
+            const indexTip = landmarks[8];
+            const middleTip = landmarks[12];
+            const indexMcp = landmarks[5];
+            const middleMcp = landmarks[9];
+
+            // 检查拇指是否明显突出于其他手指
+            const thumbToIndexDistance = Math.sqrt(
+              Math.pow(tip.x - indexTip.x, 2) + Math.pow(tip.y - indexTip.y, 2)
+            );
+            const thumbToMiddleDistance = Math.sqrt(
+              Math.pow(tip.x - middleTip.x, 2) +
+                Math.pow(tip.y - middleTip.y, 2)
+            );
+
+            // 拇指应该明显远离食指和中指（比2手势时拇指是收起的）
+            const farFromOtherFingers =
+              thumbToIndexDistance > 0.12 && thumbToMiddleDistance > 0.12;
+
+            // 拇指应该比食指和中指的MCP关节更外侧
+            const thumbIsOutside =
+              Math.abs(tip.x - indexMcp.x) > 0.08 ||
+              Math.abs(tip.x - middleMcp.x) > 0.08;
+
+            // 基于手的尺度调整阈值
+            const sizeAdjustedXThreshold = Math.max(0.06, handSize * 1.0); // 提高阈值
+
+            // 更严格的多种判断方式
+            const method1 =
+              distanceRatio > 1.35 &&
+              xDiff > sizeAdjustedXThreshold &&
+              farFromOtherFingers; // 距离+分离
+            const method2 =
+              distanceRatio > 1.25 && thumbIsOutside && xDiff > 0.08; // 距离+外侧+横向
+            const method3 =
+              thumbTipToWrist > thumbMcpToWrist + 0.1 && farFromOtherFingers; // 绝对距离+分离
+
+            isExtended = method1 || method2 || method3;
+            confidence = isExtended
+              ? Math.min(0.95, Math.max(0.5, distanceRatio * 0.6))
+              : 0.95;
+            simulatedAngle = isExtended ? 150 : 80;
+
+            console.log(
+              `🤏 拇指分析: 距离比=${distanceRatio.toFixed(
+                2
+              )}, X差=${xDiff.toFixed(3)}, Y差=${yDiff.toFixed(
+                3
+              )}, 远离其他手指=${farFromOtherFingers}, 位于外侧=${thumbIsOutside}, 方法1=${method1}, 方法2=${method2}, 方法3=${method3}, 结果=${isExtended}`
+            );
+          } else {
+            // 其他四指识别 - 增强角度适应性
+            const tipY = tip.y;
+            const pipY = pip.y;
+            const mcpY = mcp.y;
+
+            // 动态调整高度检查的容差
+            const baseTolerance = 0.008; // 稍微减小基础容差
+            const sizeTolerance = handSize * 0.15;
+            const tolerance = Math.max(baseTolerance, sizeTolerance);
+
+            const tipHigherThanPip = tipY < pipY - tolerance;
+            const pipHigherThanMcp = pipY < mcpY - tolerance;
+
+            // 距离检查
+            const tipToMcpDistance = Math.sqrt(
+              Math.pow(tip.x - mcp.x, 2) + Math.pow(tip.y - mcp.y, 2)
+            );
+            const pipToMcpDistance = Math.sqrt(
+              Math.pow(pip.x - mcp.x, 2) + Math.pow(pip.y - mcp.y, 2)
+            );
+
+            const distanceRatio = tipToMcpDistance / pipToMcpDistance;
+
+            // 根据手的尺度调整距离阈值
+            const sizeAdjustedDistanceThreshold = Math.max(
+              1.18, // 稍微提高基础阈值
+              1.4 - handSize * 2.5
+            );
+
+            const heightCheck = tipHigherThanPip && pipHigherThanMcp;
+            const distanceCheck = distanceRatio > sizeAdjustedDistanceThreshold;
+
+            // 多重判断逻辑
+            const method1 = heightCheck && distanceCheck; // 严格模式
+            const method2 = heightCheck && distanceRatio > 1.12; // 高度优先，稍微提高阈值
+            const method3 = distanceCheck && tipY < mcpY - tolerance * 0.3; // 距离优先
+
+            isExtended = method1 || method2 || method3;
+
+            // 置信度计算
+            let confidenceScore = 0.4;
+            if (tipHigherThanPip) confidenceScore += 0.2;
+            if (pipHigherThanMcp) confidenceScore += 0.2;
+            if (distanceCheck) confidenceScore += 0.2;
+
+            confidence = Math.min(0.95, confidenceScore);
+            simulatedAngle = isExtended ? 160 : 45;
+
+            console.log(
+              `👆 ${fingerName}分析: 高度✓=${heightCheck}(${tipHigherThanPip},${pipHigherThanMcp}), 距离✓=${distanceCheck}(${distanceRatio.toFixed(
+                2
+              )}>${sizeAdjustedDistanceThreshold.toFixed(
+                2
+              )}), 容差=${tolerance.toFixed(
+                3
+              )}, 方法1=${method1}, 方法2=${method2}, 方法3=${method3}, 结果=${isExtended}`
+            );
+          }
+
+          return {
+            isExtended: isExtended,
+            confidence: confidence,
+            simulatedAngle: simulatedAngle,
+          };
+        }
+
+        calculateFingerCount(fingerAnalysis) {
+          let count = 0;
+          let totalConfidence = 0;
+          let debugInfo = []; // 添加调试信息
+
+          Object.keys(fingerAnalysis).forEach((fingerName) => {
+            const finger = fingerAnalysis[fingerName];
+            const isExtended =
+              finger.isExtended &&
+              finger.confidence >= this.CONFIDENCE_THRESHOLD;
+
+            // 收集调试信息
+            debugInfo.push({
+              name: fingerName,
+              angle: Math.round(finger.angle),
+              threshold: finger.threshold,
+              isExtended: finger.isExtended,
+              confidence: Math.round(finger.confidence * 100) / 100,
+              counted: isExtended,
+            });
+
+            if (isExtended) {
+              count++;
+            }
+            totalConfidence += finger.confidence;
+          });
+
+          // 输出更详细的调试信息
+          console.log("🖐️ 手指识别详情:", {
+            检测总数: count,
+            目标数字: this.targetNumber,
+            详细信息: debugInfo,
+            总体置信度: Math.round((totalConfidence / 5) * 100) + "%",
+            历史记录: this.fingerHistory.slice(-5),
+          });
+
+          const overallConfidence = totalConfidence / 5;
+          this.algorithmConfidence.textContent = `${Math.round(
+            overallConfidence * 100
+          )}%`;
+
+          return count;
+        }
+
+        updateStabilityAnalysis(currentCount) {
+          this.fingerHistory.push(currentCount);
+          if (this.fingerHistory.length > this.HISTORY_SIZE) {
+            this.fingerHistory.shift();
+          }
+
+          const stableCount = this.getMostFrequent(this.fingerHistory);
+          this.currentFingers = stableCount;
+
+          // 立即更新显示，不等待稳定性检查
+          this.currentDetection.textContent = `${this.currentFingers} 根手指`;
+          this.updateStabilityIndicator();
+
+          console.log(
+            `📊 稳定性分析: 当前=${currentCount}, 稳定值=${stableCount}, 历史=${this.fingerHistory.join(
+              ","
+            )}`
+          );
+        }
+
+        getMostFrequent(arr) {
+          if (arr.length === 0) return 0;
+
+          const frequency = {};
+          let maxCount = 0;
+          let mostFrequent = 0;
+
+          arr.forEach((num) => {
+            frequency[num] = (frequency[num] || 0) + 1;
+            if (frequency[num] > maxCount) {
+              maxCount = frequency[num];
+              mostFrequent = num;
+            }
+          });
+
+          return mostFrequent;
+        }
+
+        updateStabilityIndicator() {
+          const dots =
+            this.stabilityIndicator.querySelectorAll(".stability-dot");
+          const recentHistory = this.fingerHistory.slice(-5);
+          const isStable =
+            recentHistory.length >= 3 &&
+            recentHistory
+              .slice(-3)
+              .every(
+                (count) => count === recentHistory[recentHistory.length - 1]
+              );
+
+          dots.forEach((dot, index) => {
+            if (
+              index < recentHistory.length &&
+              recentHistory[index] === this.currentFingers
+            ) {
+              dot.classList.add("active");
+            } else {
+              dot.classList.remove("active");
+            }
+          });
+
+          if (isStable) {
+            this.detectionPrecision.textContent = "稳定";
+          } else {
+            this.detectionPrecision.textContent = "检测中";
+          }
+        }
+
+        updateFingerDisplay(fingerAnalysis) {
+          const fingerNames = ["thumb", "index", "middle", "ring", "pinky"];
+
+          fingerNames.forEach((finger) => {
+            const analysis = fingerAnalysis[finger];
+
+            this.angleElements[finger].textContent = `${Math.round(
+              analysis.angle
+            )}°`;
+
+            const indicator = this.indicatorElements[finger];
+            if (analysis.isExtended) {
+              indicator.classList.add("extended");
+              indicator.classList.remove("folded");
+            } else {
+              indicator.classList.add("folded");
+              indicator.classList.remove("extended");
+            }
+          });
+        }
+
+        updateDetectionInfo(fingerAnalysis, palmSize) {
+          const avgConfidence =
+            Object.values(fingerAnalysis).reduce(
+              (sum, finger) => sum + finger.confidence,
+              0
+            ) / 5;
+
+          this.confidenceDisplay.textContent = `置信度: ${Math.round(
+            avgConfidence * 100
+          )}%`;
+        }
+
+        calculatePalmSize(landmarks) {
+          const wrist = landmarks[0];
+          const middleBase = landmarks[9];
+          return Math.sqrt(
+            Math.pow(wrist.x - middleBase.x, 2) +
+              Math.pow(wrist.y - middleBase.y, 2)
+          );
+        }
+
+        drawAdvancedHandLandmarks(landmarks) {
+          const ctx = this.canvasContext;
+
+          this.drawHandSkeleton(landmarks);
+
+          landmarks.forEach((landmark, index) => {
+            const x = landmark.x * this.outputCanvas.width;
+            const y = landmark.y * this.outputCanvas.height;
+
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, 2 * Math.PI);
+
+            if ([4, 8, 12, 16, 20].includes(index)) {
+              ctx.fillStyle = "#ff4757";
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(x, y, 5, 0, 2 * Math.PI);
+              ctx.strokeStyle = "#fff";
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            } else if ([3, 7, 11, 15, 19].includes(index)) {
+              ctx.fillStyle = "#3742fa";
+              ctx.fill();
+            } else {
+              ctx.fillStyle = "#ffd700";
+              ctx.fill();
+            }
+          });
+        }
+
+        drawHandSkeleton(landmarks) {
+          const ctx = this.canvasContext;
+          const connections = [
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 4],
+            [0, 5],
+            [5, 6],
+            [6, 7],
+            [7, 8],
+            [0, 9],
+            [9, 10],
+            [10, 11],
+            [11, 12],
+            [0, 13],
+            [13, 14],
+            [14, 15],
+            [15, 16],
+            [0, 17],
+            [17, 18],
+            [18, 19],
+            [19, 20],
+          ];
+
+          ctx.strokeStyle = "rgba(255, 215, 0, 0.6)";
+          ctx.lineWidth = 2;
+
+          connections.forEach(([start, end]) => {
+            const startPoint = landmarks[start];
+            const endPoint = landmarks[end];
+
+            ctx.beginPath();
+            ctx.moveTo(
+              startPoint.x * this.outputCanvas.width,
+              startPoint.y * this.outputCanvas.height
+            );
+            ctx.lineTo(
+              endPoint.x * this.outputCanvas.width,
+              endPoint.y * this.outputCanvas.height
+            );
+            ctx.stroke();
+          });
+        }
+
+        processStableGesture() {
+          if (!this.isGameActive) return;
+
+          const recentHistory = this.fingerHistory.slice(-5);
+          const isConsistent =
+            recentHistory.length >= 3 &&
+            recentHistory
+              .slice(-3)
+              .every((count) => count === this.currentFingers);
+
+          if (
+            isConsistent &&
+            this.currentFingers >= 1 &&
+            this.currentFingers <= 5
+          ) {
+            this.stableFrames++;
+            const progress = (this.stableFrames / this.REQUIRED_FRAMES) * 100;
+            this.updateProgress(progress);
+
+            if (this.stableFrames >= this.REQUIRED_FRAMES) {
+              this.confirmGesture();
+            }
+          } else {
+            this.resetStableGesture();
+          }
+        }
+
+        updateProgress(progress) {
+          this.progressFill.style.width = `${progress}%`;
+          if (progress > 0) {
+            this.progressText.textContent = `确认中... ${Math.round(
+              progress
+            )}%`;
+          } else {
+            this.progressText.textContent = "等待稳定手势...";
+          }
+        }
+
+        confirmGesture() {
+          this.resetStableGesture();
+          this.handleUserInput(this.currentFingers);
+        }
+
+        resetStableGesture() {
+          this.stableFrames = 0;
+          this.updateProgress(0);
+        }
+
+        resetDetection() {
+          // 如果等待下一轮且用户放下手，生成新数字
+          if (this.waitingForNextRound) {
+            this.waitingForNextRound = false;
+            this.generateTargetNumber();
+            this.feedback.textContent = "新目标已生成，请比出对应手指数量";
+            this.feedback.className = "feedback hint";
+            console.log("🎯 用户放下手，生成新目标数字");
+          }
+
+          this.currentFingers = 0;
+          this.fingerHistory = [];
+          this.resetStableGesture();
+          this.currentDetection.textContent = "无手势检测";
+          this.confidenceDisplay.textContent = "置信度: 等待中...";
+          this.algorithmConfidence.textContent = "0%";
+          this.detectionPrecision.textContent = "等待中";
+
+          Object.values(this.angleElements).forEach((element) => {
+            element.textContent = "--°";
+          });
+
+          Object.values(this.indicatorElements).forEach((indicator) => {
+            indicator.classList.remove("extended");
+            indicator.classList.add("folded");
+          });
+        }
+
+        handleUserInput(userInput) {
+          if (!this.isGameActive) return;
+
+          if (userInput === this.targetNumber) {
+            this.score++;
+            this.updateScore();
+            this.showSuccess();
+          } else {
+            this.showError(userInput);
+          }
+        }
+
+        showSuccess() {
+          this.targetNumberDisplay.classList.add("correct");
+          this.feedback.textContent = `✅ 识别正确！+1分 (${
+            this.themes[this.currentThemeName].name
+          }) - 保持手势稳定，等待下一题`;
+          this.feedback.className = "feedback success";
+
+          // 不自动切换数字，让用户控制节奏
+          setTimeout(() => {
+            this.targetNumberDisplay.classList.remove("correct");
+            this.feedback.textContent = "准备好后请放下手，等待下一个数字";
+            this.feedback.className = "feedback hint";
+
+            // 设置标志位，表示等待用户准备下次
+            this.waitingForNextRound = true;
+            this.resetStableGesture();
+          }, 2000);
+        }
+
+        showError(userInput) {
+          this.targetNumberDisplay.classList.add("wrong");
+          this.feedback.textContent = `❌ 识别: ${userInput}根, 目标: ${this.targetNumber}根 - 请重试`;
+          this.feedback.className = "feedback error";
+
+          setTimeout(() => {
+            this.targetNumberDisplay.classList.remove("wrong");
+            this.showHint();
+          }, 2500); // 稍微延长错误显示时间
+        }
+
+        showHint() {
+          this.feedback.textContent = "请比出对应手指数量，可切换主题体验";
+          this.feedback.className = "feedback hint";
+        }
+
+        updateScore() {
+          this.scoreDisplay.textContent = this.score;
+        }
+
+        generateTargetNumber() {
+          this.targetNumber = Math.floor(Math.random() * 5) + 1;
+          this.targetNumberDisplay.textContent = this.targetNumber;
+
+          const fingerEmojis = ["", "☝️", "✌️", "🤟", "🖖", "✋"];
+          this.fingerGuide.textContent =
+            fingerEmojis[this.targetNumber] || "✋";
+
+          this.resetStableGesture();
+        }
+
+        addEventListeners() {
+          this.restartBtn.addEventListener("click", () => {
+            this.restartGame();
+          });
+        }
+
+        restartGame() {
+          // 结束当前游戏数据上传
+          if (this.dataUploader) {
+            this.dataUploader.endGame(this.score);
+          }
+          
+          this.score = 0;
+          this.waitingForNextRound = false; // 重置等待状态
+          this.updateScore();
+          this.generateTargetNumber();
+          this.showHint();
+          this.resetDetection();
+
+          // 重新启动数据上传器
+          this.dataUploader = new GameDataUploader('cognitive', 102); // 认知能力训练，李阿姨
+          this.dataUploader.setScoreCallback(() => this.score);
+          this.dataUploader.startGame(this.score);
+
+          // 🎯 播放重新开始音效（主题色彩化）
+          this.playThemeChangeSound();
+        }
+
+        startGame() {
+          this.isGameActive = true;
+          
+          // 初始化数据上传器
+          this.dataUploader = new GameDataUploader('cognitive', 102); // 认知能力训练，李阿姨
+          this.dataUploader.setScoreCallback(() => this.score);
+          this.dataUploader.startGame(this.score);
+          
+          console.log("🎮 主题增强版游戏已启动");
+          console.log("🎨 主题系统特点:");
+          console.log("  ✅ 4种高级配色主题");
+          console.log("  ✅ 一键切换，保存偏好");
+          console.log("  ✅ 平滑过渡动画");
+          console.log("  ✅ 集成高精度识别算法");
+          console.log(
+            `  ✅ 当前主题: ${this.themes[this.currentThemeName].name}`
+          );
+        }
+
+        // 移除旧的数据上传相关功能
+        // startDataUpload() {
+        //   // 清除之前的定时器
+        //   if (this.uploadInterval) {
+        //     clearInterval(this.uploadInterval);
+        //   }
+        //   
+        //   // 每30秒上传一次数据
+        //   this.uploadInterval = setInterval(() => {
+        //     this.uploadGameData();
+        //   }, 15000); // 改为15秒
+        // }
+
+        // uploadGameData() {
+        //   const currentTime = Date.now();
+        //   const gameDuration = Math.floor((currentTime - this.gameStartTime) / 1000);
+        //   const scoreIncrease = this.score - this.lastUploadScore;
+        //   
+        //   if (scoreIncrease > 0 || gameDuration > 0) {
+        //     const data = {
+        //       patientId: 102, // 李阿姨的ID
+        //       gameType: 'number', // 标识这是数字认知游戏
+        //       scoreIncrease: scoreIncrease,
+        //       timeIncrease: 15, // 15秒时间间隔
+        //       timestamp: new Date().toISOString()
+        //     };
+
+        //     try {
+        //       // Method 1: Try to send via postMessage to parent window
+        //       if (window.parent && window.parent !== window) {
+        //         window.parent.postMessage({
+        //           type: 'GAME_DATA_UPLOAD',
+        //           data: data
+        //         }, '*');
+        //       }
+        //       
+        //       // Method 2: Store in localStorage for healthcare workstation
+        //       const existingData = JSON.parse(localStorage.getItem('gameUploadData') || '[]');
+        //       existingData.push(data);
+        //       localStorage.setItem('gameUploadData', JSON.stringify(existingData));
+        //       
+        //       // Method 3: Try to send to opener window
+        //       if (window.opener) {
+        //         window.opener.postMessage({
+        //           type: 'GAME_DATA_UPLOAD',
+        //           data: data
+        //         }, '*');
+        //       }
+        //       
+        //       console.log('认知游戏数据已上传:', data);
+        //       
+        //       // 显示上传提示
+        //       this.showUploadNotification(data.scoreIncrease, data.timeIncrease);
+        //       
+        //       // 更新上次上传的得分
+        //       this.lastUploadScore = this.score;
+        //       
+        //     } catch (error) {
+        //       console.error('上传认知游戏数据失败:', error);
+        //     }
+        //   }
+        // }
+        
+        // 移除旧的显示数据上传提示方法
+        // showUploadNotification(scoreIncrease, timeIncrease) {
+        //   // 创建提示元素
+        //   const notificationEl = document.createElement('div');
+        //   notificationEl.className = 'upload-notification';
+        //   notificationEl.innerHTML = `
+        //     <div class="upload-notification-content">
+        //       <span>数据已上传: 得分+${scoreIncrease}, 时长+${timeIncrease}秒</span>
+        //     </div>
+        //   `;
+        //   
+        //   // 添加样式
+        //   notificationEl.style.cssText = `
+        //     position: fixed;
+        //     top: 20px;
+        //     right: 20px;
+        //     background: rgba(76, 175, 80, 0.9);
+        //     color: white;
+        //     padding: 10px 15px;
+        //     border-radius: 5px;
+        //     z-index: 10000;
+        //     font-family: Inter, sans-serif;
+        //     font-size: 14px;
+        //     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        //     transition: all 0.3s ease;
+        //   `;
+        //   
+        //   // 添加到页面
+        //   document.body.appendChild(notificationEl);
+        //   
+        //   // 2秒后移除
+        //   setTimeout(() => {
+        //     notificationEl.style.opacity = '0';
+        //     setTimeout(() => {
+        //       if (notificationEl.parentNode) {
+        //         notificationEl.parentNode.removeChild(notificationEl);
+        //       }
+        //     }, 300);
+        //   }, 2000);
+        // }
+      }
+
+      // 初始化游戏
+      document.addEventListener("DOMContentLoaded", () => {
+        try {
+          console.log('🚀 认知训练游戏开始初始化...');
+          console.log('🌐 当前环境:', {
+            protocol: window.location.protocol,
+            host: window.location.host,
+            userAgent: navigator.userAgent,
+            hasGetUserMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+            hasMediaPipe: typeof Hands !== "undefined" && typeof Camera !== "undefined"
+          });
+
+          if (typeof Hands === "undefined" || typeof Camera === "undefined") {
+            console.error("❌ MediaPipe库加载失败");
+            alert("MediaPipe库加载失败，请刷新页面重试\n\n可能原因：\n1. 网络连接问题\n2. CDN服务不可用\n\n解决方案：\n1. 刷新页面\n2. 检查网络连接");
+            return;
+          }
+
+          // 显示环境信息给用户
+          const isHTTPS = window.location.protocol === 'https:';
+          const supportCamera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+          
+          if (!isHTTPS && window.location.hostname !== 'localhost') {
+            console.warn('⚠️ 当前使用HTTP协议，摄像头功能可能受限');
+          }
+          
+          if (!supportCamera) {
+            console.warn('⚠️ 当前浏览器不支持摄像头API');
+          }
+
+          const game = new ThemeEnhancedGame();
+          console.log('✅ 认知训练游戏初始化完成');
+        } catch (error) {
+          console.error('❌ 游戏初始化失败:', error);
+          alert(`游戏初始化失败: ${error.message}\n\n请刷新页面重试`);
+        }
+      });
+    </script>
+  </body>
+</html>

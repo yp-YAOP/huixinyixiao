@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地化模型部署示例</title>
+    
+    <!-- 本地化的CSS资源 -->
+    <link rel="stylesheet" href="./css-frameworks/tailwind.min.css">
+    <link rel="stylesheet" href="./css-frameworks/font-awesome.min.css">
+    <link rel="stylesheet" href="./fonts/inter-font.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            background: #f8f9ff;
+            border-left: 4px solid #4f46e5;
+        }
+        .status-icon {
+            margin-right: 15px;
+            width: 24px;
+            height: 24px;
+        }
+        .btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: #10b981;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px dashed #e5e7eb;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-8">
+            <i class="fas fa-server"></i>
+            本地化模型部署成功
+        </h1>
+        
+        <div class="text-center mb-8">
+            <p class="text-gray-600">所有外部依赖已成功本地化，系统可在离线环境下正常运行</p>
+        </div>
+
+        <!-- 状态检查 -->
+        <div class="demo-section">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-check-circle text-green-500"></i>
+                系统状态检查
+            </h2>
+            
+            <div class="status-item">
+                <i class="fas fa-css3-alt status-icon text-blue-500"></i>
+                <div>
+                    <strong>TailwindCSS</strong>
+                    <p class="text-sm text-gray-600">本地化CSS框架加载成功</p>
+                </div>
+            </div>
+            
+            <div class="status-item">
+                <i class="fas fa-icons status-icon text-blue-500"></i>
+                <div>
+                    <strong>Font Awesome</strong>
+                    <p class="text-sm text-gray-600">本地化图标库加载成功</p>
+                </div>
+            </div>
+            
+            <div class="status-item">
+                <i class="fas fa-font status-icon text-purple-500"></i>
+                <div>
+                    <strong>Google Fonts (Inter)</strong>
+                    <p class="text-sm text-gray-600">本地化字体加载成功</p>
+                </div>
+            </div>
+            
+            <div class="status-item">
+                <i class="fas fa-chart-line status-icon text-green-500"></i>
+                <div>
+                    <strong>Chart.js</strong>
+                    <p class="text-sm text-gray-600">本地化图表库加载成功</p>
+                </div>
+            </div>
+            
+            <div class="status-item">
+                <i class="fas fa-cube status-icon text-red-500"></i>
+                <div>
+                    <strong>Three.js</strong>
+                    <p class="text-sm text-gray-600">本地化3D库加载成功</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart.js 演示 -->
+        <div class="demo-section">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-chart-bar"></i>
+                Chart.js 本地化演示
+            </h2>
+            <div class="chart-container">
+                <canvas id="demoChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Three.js 演示 -->
+        <div class="demo-section">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-cube"></i>
+                Three.js 本地化演示
+            </h2>
+            <div id="threejs-demo" style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 8px; position: relative;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #666;">
+                    3D场景将在这里渲染
+                </div>
+            </div>
+        </div>
+
+        <!-- API测试 -->
+        <div class="demo-section">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-api"></i>
+                本地API服务器测试
+            </h2>
+            
+            <div class="flex flex-wrap gap-4 mb-4">
+                <button class="btn" onclick="testApiHealth()">
+                    <i class="fas fa-heartbeat"></i>
+                    健康检查
+                </button>
+                <button class="btn" onclick="testHighscores()">
+                    <i class="fas fa-trophy"></i>
+                    获取高分榜
+                </button>
+                <button class="btn btn-success" onclick="submitTestScore()">
+                    <i class="fas fa-plus"></i>
+                    提交测试分数
+                </button>
+            </div>
+            
+            <div id="api-results" class="bg-gray-100 p-4 rounded-lg">
+                <p class="text-gray-600">点击上方按钮测试本地API服务器...</p>
+            </div>
+        </div>
+
+        <!-- 使用说明 -->
+        <div class="demo-section">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-book"></i>
+                使用说明
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                    <p class="font-semibold text-blue-800">启动本地API服务器：</p>
+                    <code class="text-sm text-blue-600">cd local-models && start-local-api.bat</code>
+                </div>
+                
+                <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                    <p class="font-semibold text-green-800">使用本地化版本：</p>
+                    <code class="text-sm text-green-600">在URL后添加 ?local=true 参数</code>
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <p class="font-semibold text-yellow-800">永久启用本地模式：</p>
+                    <code class="text-sm text-yellow-600">localStorage.setItem('useLocalModels', 'true')</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 本地化的JavaScript资源 -->
+    <script src="./js-libraries/chart.min.js"></script>
+    <script src="./js-libraries/three.min.js"></script>
+    <script src="./local-config.js"></script>
+
+    <script>
+        // Chart.js 演示
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('demoChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['训练1', '训练2', '训练3', '训练4', '训练5'],
+                    datasets: [{
+                        label: '康复进度',
+                        data: [65, 70, 80, 85, 90],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '患者康复进度示例'
+                        }
+                    }
+                }
+            });
+
+            // Three.js 演示
+            if (typeof THREE !== 'undefined') {
+                initThreeJSDemo();
+            }
+        });
+
+        function initThreeJSDemo() {
+            const container = document.getElementById('threejs-demo');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            container.innerHTML = '';
+            container.appendChild(renderer.domElement);
+
+            // 创建一个旋转的立方体
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({ color: 0x4f46e5 });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            camera.position.z = 5;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // API测试函数
+        async function testApiHealth() {
+            const results = document.getElementById('api-results');
+            results.innerHTML = '<p>检查API健康状态...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:8888/api/health');
+                const data = await response.json();
+                results.innerHTML = `
+                    <div class="text-green-600">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>API服务器健康状态：</strong>
+                        <pre class="mt-2 text-sm">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>连接失败：</strong> ${error.message}
+                        <p class="text-sm mt-2">请确保本地API服务器已启动</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testHighscores() {
+            const results = document.getElementById('api-results');
+            results.innerHTML = '<p>获取高分榜数据...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:8888/api/highscores');
+                const data = await response.json();
+                results.innerHTML = `
+                    <div class="text-blue-600">
+                        <i class="fas fa-trophy"></i>
+                        <strong>高分榜数据：</strong>
+                        <pre class="mt-2 text-sm">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>获取失败：</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function submitTestScore() {
+            const results = document.getElementById('api-results');
+            results.innerHTML = '<p>提交测试分数...</p>';
+            
+            const testData = {
+                playerName: '测试用户',
+                score: Math.floor(Math.random() * 1000),
+                gameType: '本地化测试',
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8888/api/submit-score', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                const data = await response.json();
+                results.innerHTML = `
+                    <div class="text-green-600">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>分数提交成功：</strong>
+                        <pre class="mt-2 text-sm">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>提交失败：</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

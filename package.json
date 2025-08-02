@@ -1,0 +1,23 @@
+{
+  "name": "huixinyixiao-network",
+  "version": "1.0.0",
+  "description": "慧心一孝局域网数据传输系统",
+  "main": "network-server.js",
+  "scripts": {
+    "start": "node network-server.js",
+    "install-deps": "npm install express cors"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "selfsigned": "^2.4.1"
+  },
+  "keywords": [
+    "healthcare",
+    "rehabilitation",
+    "network",
+    "real-time"
+  ],
+  "author": "慧心一孝团队",
+  "license": "MIT"
+}

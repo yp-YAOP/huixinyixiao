@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水果忍者数据上传测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056CC;
+        }
+        .log-area {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            min-height: 200px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #e8f4f8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 水果忍者数据上传测试</h1>
+        
+        <div class="status" id="status">
+            状态：准备测试
+        </div>
+        
+        <div>
+            <button class="test-button" onclick="testDataUpload()">测试数据上传</button>
+            <button class="test-button" onclick="simulateGameData()">模拟游戏数据</button>
+            <button class="test-button" onclick="checkLocalStorage()">检查localStorage</button>
+            <button class="test-button" onclick="clearStorage()">清除存储</button>
+            <button class="test-button" onclick="openMedicalStation()">打开医护工作站</button>
+        </div>
+        
+        <div class="log-area" id="logArea">
+            <strong>测试日志:</strong><br>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logArea = document.getElementById('logArea');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.innerHTML += `${timestamp}: ${message}<br>`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = '状态：' + message;
+            log('状态更新: ' + message);
+        }
+        
+        function testDataUpload() {
+            log('开始测试数据上传功能...');
+            
+            const testData = {
+                patientId: 102,
+                gameType: 'reaction',
+                scoreIncrease: 50,
+                timeIncrease: 15,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                // 模拟数据上传
+                const existingData = JSON.parse(localStorage.getItem('gameUploadData') || '[]');
+                existingData.push(testData);
+                localStorage.setItem('gameUploadData', JSON.stringify(existingData));
+                
+                // 触发storage事件
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: 'gameUploadData',
+                    newValue: JSON.stringify(existingData),
+                    storageArea: localStorage
+                }));
+                
+                log('✅ 测试数据上传成功');
+                log(`   患者ID: ${testData.patientId}`);
+                log(`   游戏类型: ${testData.gameType}`);
+                log(`   得分增加: ${testData.scoreIncrease}`);
+                log(`   时长增加: ${testData.timeIncrease}秒`);
+                
+                updateStatus('数据上传测试通过');
+                
+            } catch (error) {
+                log('❌ 数据上传失败: ' + error.message);
+                updateStatus('数据上传测试失败');
+            }
+        }
+        
+        function simulateGameData() {
+            log('开始模拟游戏数据上传...');
+            
+            let gameScore = 0;
+            let uploadCount = 0;
+            
+            const interval = setInterval(() => {
+                uploadCount++;
+                gameScore += Math.floor(Math.random() * 30) + 10; // 随机增加10-40分
+                
+                const data = {
+                    patientId: 102,
+                    gameType: 'reaction',
+                    scoreIncrease: gameScore,
+                    timeIncrease: 15,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // 上传数据
+                const existingData = JSON.parse(localStorage.getItem('gameUploadData') || '[]');
+                existingData.push(data);
+                localStorage.setItem('gameUploadData', JSON.stringify(existingData));
+                
+                log(`📊 模拟上传 #${uploadCount}: 得分+${gameScore}, 时长+15秒`);
+                
+                if (uploadCount >= 3) {
+                    clearInterval(interval);
+                    log('✅ 模拟游戏数据上传完成');
+                    updateStatus(`已模拟${uploadCount}次数据上传`);
+                }
+            }, 2000); // 每2秒模拟一次上传
+            
+            updateStatus('正在模拟游戏数据...');
+        }
+        
+        function checkLocalStorage() {
+            log('检查localStorage中的游戏数据...');
+            
+            try {
+                const data = localStorage.getItem('gameUploadData');
+                if (data) {
+                    const gameData = JSON.parse(data);
+                    log(`📦 找到 ${gameData.length} 条游戏数据:`);
+                    gameData.forEach((item, index) => {
+                        log(`   ${index + 1}. 患者${item.patientId} ${item.gameType} 得分+${item.scoreIncrease} 时长+${item.timeIncrease}秒`);
+                    });
+                    updateStatus(`localStorage中有${gameData.length}条数据`);
+                } else {
+                    log('📦 localStorage中没有游戏数据');
+                    updateStatus('localStorage为空');
+                }
+            } catch (error) {
+                log('❌ 检查localStorage失败: ' + error.message);
+                updateStatus('检查localStorage失败');
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.removeItem('gameUploadData');
+            log('🗑️ 已清除localStorage中的游戏数据');
+            updateStatus('存储已清除');
+        }
+        
+        function openMedicalStation() {
+            const url = '../yihu.html';
+            window.open(url, '_blank');
+            log('🏥 正在打开医护工作站...');
+        }
+        
+        // 页面加载时的初始化
+        window.addEventListener('load', function() {
+            log('水果忍者数据上传测试页面已加载');
+            updateStatus('测试页面已就绪');
+            
+            // 检查是否有现有数据
+            checkLocalStorage();
+        });
+        
+        // 监听storage事件
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'gameUploadData') {
+                log('📨 检测到storage事件触发');
+            }
+        });
+        
+        log('🚀 测试系统初始化完成');
+    </script>
+</body>
+</html>
